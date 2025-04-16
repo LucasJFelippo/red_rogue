@@ -1,2 +1,2 @@
 # red_fight
-A fighting game made using Unity as a university project.
+A rogue like game made using Unity as a university project.
