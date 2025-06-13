@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Red Rogue.sln"
+    "dotnet.defaultSolution": "red_rogue.sln"
 }
