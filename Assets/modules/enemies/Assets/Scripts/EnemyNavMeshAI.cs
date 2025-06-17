@@ -3,7 +3,7 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(EnemyAttack))] // Now requires the attack script
+[RequireComponent(typeof(EnemyAttack))]
 public class EnemyNavMeshAI : MonoBehaviour
 {
     public enum AIState { Patrolling, Pursuing, Lurking }
@@ -39,7 +39,7 @@ public class EnemyNavMeshAI : MonoBehaviour
     private NavMeshAgent navMeshAgent;
     private Animator animator;
     private Transform playerTarget;
-    private EnemyAttack enemyAttack; // Reference to the new attack script
+    private EnemyAttack enemyAttack;
     private int currentPatrolIndex;
 
     private float timeSinceLastLurkChange = 0f;
@@ -49,7 +49,7 @@ public class EnemyNavMeshAI : MonoBehaviour
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-        enemyAttack = GetComponent<EnemyAttack>(); // Get the attack script
+        enemyAttack = GetComponent<EnemyAttack>(); 
 
         GameObject playerObject = GameObject.FindGameObjectWithTag(playerTag);
         if (playerObject != null)
@@ -148,7 +148,6 @@ public class EnemyNavMeshAI : MonoBehaviour
 
         if (!navMeshAgent.pathPending && navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
         {
-            // Go to the next patrol point
             currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Length;
             navMeshAgent.SetDestination(patrolPoints[currentPatrolIndex].position);
         }
@@ -167,16 +166,14 @@ public class EnemyNavMeshAI : MonoBehaviour
         FaceTarget(playerTarget.position);
 
         // --- DELEGATED ATTACK LOGIC ---
-        // Check if the enemy can and should attack
         if (enemyAttack.CanAttack && Vector3.Distance(transform.position, playerTarget.position) <= enemyAttack.attackRange)
         {
-            // Stop moving to attack and tell the attack script to do its job
             navMeshAgent.ResetPath();
             enemyAttack.PerformAttack();
-            return; // Exit the Lurk method to let the attack animation play out
+            return;
         }
 
-        // --- Evasion / Repositioning Logic ---
+        // --- Evasion ---
         timeSinceLastLurkChange += Time.deltaTime;
         if (timeSinceLastLurkChange >= lurkPointChangeTime)
         {
@@ -229,8 +226,6 @@ public class EnemyNavMeshAI : MonoBehaviour
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, engagementDistance);
 
-        // Draw attack range gizmo using the value from the attack script
-        // We do a null check in case the component isn't assigned yet in the editor
         var attackComponent = GetComponent<EnemyAttack>();
         if (attackComponent != null)
         {
