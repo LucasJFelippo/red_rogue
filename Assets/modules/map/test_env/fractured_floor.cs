@@ -8,21 +8,24 @@ using System.Linq;
 public class FloorGenerator : MonoBehaviour
 {
     [Header("Grid Size")]
-    public int   width    = 10;
-    public int   height   = 10;
+    public int   width     = 10;
+    public int   height    = 10;
 
     private List<(float x, float y, float w, float h)> _rect_tiles;
 
     [Header("Crack Width (world units)")]
-    public float border   = 0.02f;
+    public float border    = 0.02f;
+    public float   heightVar = 0.5f;
 
     [Header("Atlas & UVs")]
-    public Texture2D atlas;       // your tile‐atlas
-    public Rect[]    uvRects;     // UV rect for each tile type
-    public int[,]    pattern;     // pattern[x,y] → index into uvRects
+    public Texture2D topAtlas;
+    public Texture2D sideAtlas;
+    public Rect[]    uvRects;     // Using it as entire
+    public int[,]    pattern;     // Only one pattern
 
     [Header("Optional")]
-    public Material  tileMaterial; // a Material that uses your atlas
+    public Material  topMaterial;
+    public Material  sideMaterial;
 
 
     void Start()
@@ -59,19 +62,22 @@ public class FloorGenerator : MonoBehaviour
         
         var go = new GameObject($"Tile_{x}_{y}");
         go.transform.SetParent(transform, false);
-        go.transform.localPosition = new Vector3(x, 0, y);
+
+        float randomHeight = UnityEngine.Random.Range(0, heightVar);
+        go.transform.localPosition = new Vector3(x, randomHeight, y);
 
         var mf = go.AddComponent<MeshFilter>();
         var mr = go.AddComponent<MeshRenderer>();
 
-        if (tileMaterial != null)
+        if (topMaterial != null)
         {
-            mr.material = tileMaterial;
+            mr.material = topMaterial;
+            mr.material.mainTexture = topAtlas;
         }
         else
         {
             mr.material = new Material(Shader.Find("Standard"));
-            mr.material.mainTexture = atlas;
+            mr.material.mainTexture = topAtlas;
         }
 
         mf.mesh = BuildRectMesh(w, h);
@@ -113,7 +119,6 @@ public class FloorGenerator : MonoBehaviour
     {
         var mesh = new Mesh();
 
-        // inset corners by `border`
         float x0 = border;
         float x1 = hwidth - border;
         float z0 = border;
@@ -135,8 +140,8 @@ public class FloorGenerator : MonoBehaviour
 
         // UVs inset by the same fraction of the atlas
         Rect uvR = uvRects[0];
-        float uB = border / atlas.width;
-        float vB = border / atlas.height;
+        float uB = border / topAtlas.width;
+        float vB = border / topAtlas.height;
 
         mesh.uv = new Vector2[]
         {
