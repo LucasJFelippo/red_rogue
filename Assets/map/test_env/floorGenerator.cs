@@ -61,20 +61,18 @@ public class floorGenerator : MonoBehaviour
 
         foreach (Rect rect in _tile_array)
         {
-            float prob = UnityEngine.Random.value * 100;
-
-            float modifier = 80;
-
-            float distTile = Vector2.Distance(new Vector2(rect.x, rect.y), new Vector2(width, depth));
-            float distNomalized = distTile / distArena;
-            
-            modifier *= (float)Math.Pow(distNomalized, 3);
-
-            Debug.Log(distNomalized);
-            if  (prob > modifier)
+            if (rect.x == 0 || rect.y == 0)
             {
-                CreateTile(rect);
+                // Draw Inner Walls
+                continue;
             }
+
+            if (rect.x + rect.width > width - 1 || rect.y + rect.height > depth - 1)
+            {
+                // Draw Outer Walls
+            }
+
+            CreateTile(rect);
         }
 
     }
@@ -122,7 +120,7 @@ public class floorGenerator : MonoBehaviour
         var gameObj = new GameObject($"Tile_{transform.childCount:D3}");
         gameObj.transform.SetParent(transform, false);
 
-        float randElevation= UnityEngine.Random.Range(0, maxElevation);
+        float randElevation = UnityEngine.Random.Range(0, maxElevation);
         gameObj.transform.localPosition = new Vector3(rect.x, randElevation, rect.y);
 
         var meshFilter = gameObj.AddComponent<MeshFilter>();
@@ -140,6 +138,10 @@ public class floorGenerator : MonoBehaviour
             sideMaterial,
             sideMaterial
         };
+
+        var collider = gameObj.AddComponent<BoxCollider>();
+        collider.size = new Vector3(rect.width, 0.2f, rect.height);
+        collider.center = new Vector3(rect.width * 0.5f, 0.1f, rect.height * 0.5f);
 
         return gameObj;
     }
@@ -245,4 +247,39 @@ public class floorGenerator : MonoBehaviour
         mesh.RecalculateBounds();
         return mesh;
     }
+
+    // GameObject CreateOuterWallTile(Rect rect)
+    // {
+    //     var gameObj = new GameObject($"Outer_Wall_{transform.childCount:D3}");
+    //     gameObj.transform.SetParent(transform, false);
+
+    //     gameObj.transform.localPosition = new Vector3(rect.x, 0, rect.y);
+
+    //     var meshFilter = gameObj.AddComponent<MeshFilter>();
+
+    //     float f = fractureSize;
+    //     Rect localRect = new Rect(f, f, rect.width - f, rect.height - f);
+    //     meshFilter.mesh = BuildTileMesh(localRect, randElevation);
+
+    //     var meshRenderer = gameObj.AddComponent<MeshRenderer>();
+
+    //     topMaterial.mainTexture = topAtlas;
+    //     sideMaterial.mainTexture = sideAtlas;
+    //     meshRenderer.sharedMaterials = new Material[]{
+    //         topMaterial,
+    //         sideMaterial,
+    //         sideMaterial
+    //     };
+
+    //     var collider = gameObj.AddComponent<BoxCollider>();
+    //     collider.size = new Vector3(rect.width, 0.2f, rect.height);
+    //     collider.center = new Vector3(rect.width * 0.5f, 0.1f, rect.height * 0.5f);
+
+    //     return gameObj;
+    // }
+
+    // Mesh BuildOuterWallTileMesh()
+    // {
+
+    // }
 }
