@@ -18,7 +18,7 @@ public class floorGen : MonoBehaviour
     public float minPerimeter = 4;
     public float minWidth = 1.2f;
     public float minDepth = 0.8f;
-    public float maxElevation = 0.15f;
+    public float maxElevation = 0.25f;
 
     [Header("Walls Size")]
     public float wallHeight = 5;
@@ -50,7 +50,8 @@ public class floorGen : MonoBehaviour
     {
         topMaterial.mainTexture = topAtlas;
         sideMaterial.mainTexture = sideAtlas;
-        // GenerateFloor();
+        
+        GenerateFloor();
     }
 
     [ContextMenu("Generate Floor")]
@@ -97,7 +98,17 @@ public class floorGen : MonoBehaviour
             floorTiles.Add(CreateTile(rect, floorParent));
         }
 
-        StartCoroutine(FloorRisingAnimation(floorTiles));
+        if (Application.isPlaying)
+        {
+            StartCoroutine(FloorRisingAnimation(floorTiles));
+        }
+        else
+        {
+            foreach (var tile in floorTiles)
+            {
+                tile.SetActive(true);
+            }
+        }
     }
 
     #region Random Gen Alg
@@ -167,7 +178,7 @@ public class floorGen : MonoBehaviour
 
         var collider = gameObj.AddComponent<BoxCollider>();
         collider.size = new Vector3(rect.width, 0.2f, rect.height);
-        collider.center = new Vector3(rect.width * 0.5f, 0.1f, rect.height * 0.5f);
+        collider.center = new Vector3(rect.width * 0.5f, randElevation + height - 0.2f, rect.height * 0.5f);
 
         return gameObj;
     }
@@ -307,10 +318,10 @@ public class floorGen : MonoBehaviour
         float h = wallHeight;
         float d = rect.height;
 
-        Vector3 p0 = new Vector3(0, -height, 0);
-        Vector3 p1 = new Vector3(w, -height, 0);
-        Vector3 p2 = new Vector3(w, -height, d);
-        Vector3 p3 = new Vector3(0, -height, d);
+        Vector3 p0 = new Vector3(0, 0, 0);
+        Vector3 p1 = new Vector3(w, 0, 0);
+        Vector3 p2 = new Vector3(w, 0, d);
+        Vector3 p3 = new Vector3(0, 0, d);
         Vector3 p4 = new Vector3(0, h, 0);
         Vector3 p5 = new Vector3(w, h, 0);
         Vector3 p6 = new Vector3(w, h, d);
