@@ -8,6 +8,23 @@ public class SmoothCameraFollow : MonoBehaviour
     public Vector3 offset = new Vector3(-15f, 13f, -15f);
     public float smoothSpeed = 5f;
 
+    public float startSize = 10f;
+    public float targetSize = 2.5f;
+    public float duration = 5f;
+
+    private Camera cam;
+
+    void Start()
+    {
+        cam = GetComponent<Camera>();
+
+        cam.orthographicSize = startSize;
+
+        LeanTween.value(gameObject, startSize, targetSize, duration)
+            .setOnUpdate((float val) => cam.orthographicSize = val)
+            .setEaseOutCubic();
+    }
+
     void LateUpdate()
     {
         if (target != null)
