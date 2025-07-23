@@ -1,6 +1,6 @@
 using UnityEngine;
-
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(EnemyStats))]
 public class EnemyAttack : MonoBehaviour
 {
     public enum AttackStyle { Melee, Ranged }
@@ -10,8 +10,7 @@ public class EnemyAttack : MonoBehaviour
 
     [Header("Common Settings")]
     public float attackRange = 5f;
-    public float attackCooldown = 2f;
-    [Tooltip("How long the attack animation takes. The AI will be locked in an 'Attacking' state for this duration.")]
+    [Tooltip("How long the attack animation takes.")]
     public float attackDuration = 1f;
     public string animatorAttackTrigger = "Attack";
 
@@ -20,25 +19,32 @@ public class EnemyAttack : MonoBehaviour
     public Transform projectileSpawnPoint;
 
     private Animator animator;
+    private EnemyStats stats;
+
     private int animatorAttackTriggerHash;
     private float timeSinceLastAttack = 0f;
 
-    public bool CanAttack => timeSinceLastAttack >= attackCooldown;
+    public bool CanAttack => timeSinceLastAttack >= stats.attackCooldown;
 
     void Awake()
     {
         animator = GetComponent<Animator>();
+        stats = GetComponent<EnemyStats>();
     }
 
     void Start()
     {
         animatorAttackTriggerHash = Animator.StringToHash(animatorAttackTrigger);
-        timeSinceLastAttack = attackCooldown;
+
+        if (stats != null)
+        {
+            timeSinceLastAttack = stats.attackCooldown;
+        }
     }
 
     void Update()
     {
-        if (timeSinceLastAttack < attackCooldown)
+        if (stats != null && timeSinceLastAttack < stats.attackCooldown)
         {
             timeSinceLastAttack += Time.deltaTime;
         }

@@ -52,7 +52,9 @@ public class EnemyNavMeshAI : MonoBehaviour
     private float timeInCurrentState = 0f;
     private int circlingDirection = 1;
     private int animatorSpeedParamHash;
+    private int animatorAIStateParamHash;
     private bool justAttacked = false;
+    
 
     void Awake()
     {
@@ -67,6 +69,7 @@ public class EnemyNavMeshAI : MonoBehaviour
     void Start()
     {
         animatorSpeedParamHash = Animator.StringToHash(animatorSpeedParameter);
+        animatorAIStateParamHash = Animator.StringToHash("AIState");
         currentPatrolIndex = 0;
         SetState(AIState.Patrolling);
         InvokeRepeating(nameof(CheckConditions), 0, checkInterval);
@@ -96,20 +99,24 @@ public class EnemyNavMeshAI : MonoBehaviour
         switch (currentState)
         {
             case AIState.Patrolling:
+                animator.SetInteger("AIState", 0);
                 navMeshAgent.speed = patrolSpeed;
                 navMeshAgent.stoppingDistance = 0;
                 if (patrolPoints.Length > 0) navMeshAgent.SetDestination(patrolPoints[currentPatrolIndex].position);
                 break;
             case AIState.Pursuing:
+                animator.SetInteger("AIState", 1);
                 navMeshAgent.speed = pursuitSpeed;
                 navMeshAgent.stoppingDistance = engagementDistance;
                 break;
             case AIState.Lurking:
+                animator.SetInteger("AIState", 2);
                 navMeshAgent.speed = (combatStyle == CombatStyle.Melee) ? meleeLurkSpeed : rangedCirclingSpeed;
                 navMeshAgent.stoppingDistance = 0;
                 circlingDirection = (Random.value > 0.5f) ? 1 : -1;
                 break;
             case AIState.Attacking:
+                animator.SetInteger("AIState", 3);
                 navMeshAgent.ResetPath();
                 break;
         }
