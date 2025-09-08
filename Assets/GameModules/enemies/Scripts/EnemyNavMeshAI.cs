@@ -77,6 +77,14 @@ public class EnemyNavMeshAI : MonoBehaviour
 
     void Update()
     {
+        if (playerTarget == null)
+        {
+            if (currentState != AIState.Patrolling)
+            {
+                SetState(AIState.Patrolling);
+            }
+        }
+
         timeInCurrentState += Time.deltaTime;
 
         switch (currentState)
@@ -190,6 +198,7 @@ public class EnemyNavMeshAI : MonoBehaviour
 
     private void Attack()
     {
+        if (playerTarget == null) return;
         FaceTarget(playerTarget.position);
 
         if (timeInCurrentState < Time.deltaTime * 2)
@@ -209,6 +218,7 @@ public class EnemyNavMeshAI : MonoBehaviour
 
     private void ForceMeleeReposition()
     {
+        if (playerTarget == null) return;
         Vector2 randomPoint2D = Random.insideUnitCircle * meleeLurkRadius;
         Vector3 randomPoint3D = new Vector3(playerTarget.position.x + randomPoint2D.x, transform.position.y, playerTarget.position.z + randomPoint2D.y);
         if (NavMesh.SamplePosition(randomPoint3D, out NavMeshHit hit, meleeLurkRadius, NavMesh.AllAreas))
@@ -219,6 +229,7 @@ public class EnemyNavMeshAI : MonoBehaviour
 
     private void LurkRanged()
     {
+        if (playerTarget == null) return;
         float timeStuck = 0f;
         if (navMeshAgent.hasPath && navMeshAgent.velocity.sqrMagnitude < 0.1f) timeStuck += Time.deltaTime;
         else timeStuck = 0f;
