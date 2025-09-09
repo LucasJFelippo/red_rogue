@@ -7,10 +7,10 @@ public struct SpatialAudio
     public GameObject sourceObject;
     public AudioSource audioSource;
 
-    public SpatialAudio(GameObject sourceObj, AudioSource sourceAudio)
+    public SpatialAudio(GameObject sourceObj, AudioSource sourceAud)
     {
     sourceObject = sourceObj;
-    audioSource = sourceAudio;
+    audioSource = sourceAud;
     }
 }
 

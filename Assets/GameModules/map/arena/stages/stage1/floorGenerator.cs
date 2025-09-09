@@ -1,9 +1,11 @@
 using UnityEngine;
+using UnityEditor;
 using System.Collections;
 
 using System.Collections.Generic;
 using System.Linq;
 using System;
+
 
 public class floorGen : MonoBehaviour
 {
@@ -22,7 +24,6 @@ public class floorGen : MonoBehaviour
 
     [Header("Walls Size")]
     public float wallHeight = 5;
-    public float wallThickness = 0.5f;
 
     [Header("Fractures")]
     public float fractureSize = 0.05f;
@@ -434,6 +435,64 @@ public class floorGen : MonoBehaviour
             LeanTween.moveLocal(tile, startPos, duration).setEaseOutBack();
 
             yield return new WaitForSeconds(delay);
+        }
+    }
+    #endregion
+
+
+    #region Testing and Debuggin
+    [ContextMenu("Show Rect Map")]
+    public void ShowRectMap()
+    {
+        List<Rect> _tile_array = new List<Rect>();
+        SplitHalf(new Rect(0f, 0f, width, depth), _tile_array);
+
+        MapWindow.Rects = _tile_array;
+
+        // instantiate/focus it
+        var win = EditorWindow.GetWindow<MapWindow>("Rect Map");
+        win.minSize = new Vector2(200, 200);
+        win.Show();
+    }
+
+    private class MapWindow : EditorWindow
+    {
+        public static List<Rect> Rects;
+        const float M = 10f;
+
+        void OnGUI()
+        {
+            if (Rects == null || Rects.Count == 0)
+            {
+                EditorGUILayout.LabelField("No rects to display.");
+                return;
+            }
+
+            // compute world-bounds
+            float minX = Rects.Min(r => r.x);
+            float minY = Rects.Min(r => r.y);
+            float maxX = Rects.Max(r => r.x + r.width);
+            float maxY = Rects.Max(r => r.y + r.height);
+
+            float availW = position.width  - 2*M;
+            float availH = position.height - 2*M;
+            float totalW = maxX - minX;
+            float totalH = maxY - minY;
+            float s = Mathf.Min(availW/totalW, availH/totalH);
+
+            // draw each rect
+            for (int i = 0; i < Rects.Count; i++)
+            {
+                var r = Rects[i];
+                var dr = new Rect(
+                    M + (r.x - minX)*s,
+                    M + (r.y - minY)*s,
+                    r.width * s,
+                    r.height * s
+                );
+                var c = Color.HSVToRGB(i/(float)Rects.Count, 0.7f, 0.8f);
+                EditorGUI.DrawRect(dr, c);
+            }
         }
     }
     #endregion

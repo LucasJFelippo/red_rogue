@@ -11,6 +11,8 @@ public class GameManager : MonoBehaviour, IGameManInterface
 
     public static GameManager instance = null;
 
+    [Header("Player")]
+
     [Header("Enemies")]
     private List<EnemyStats> spawnedEnemies = new List<EnemyStats>();
 
