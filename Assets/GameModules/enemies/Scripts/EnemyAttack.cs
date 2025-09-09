@@ -24,6 +24,7 @@ public class EnemyAttack : MonoBehaviour
     private int animatorAttackTriggerHash;
     private float timeSinceLastAttack = 0f;
 
+
     public bool CanAttack => timeSinceLastAttack >= stats.attackCooldown;
 
     void Awake()
@@ -66,7 +67,10 @@ public class EnemyAttack : MonoBehaviour
             }
 
             GameObject projectile = Instantiate(projectilePrefab, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
-            projectile.transform.LookAt(target.position);
+
+            Vector3 alvo = target.position;
+            alvo.y = transform.position.y;
+            projectile.transform.LookAt(alvo);
         }
     }
 }
