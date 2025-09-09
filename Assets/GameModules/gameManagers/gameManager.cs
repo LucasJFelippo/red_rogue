@@ -3,19 +3,32 @@ using UnityEngine;
 using System.Collections.Generic;
 
 
-public class gameManager : MonoBehaviour, IGameManInterface
+public class GameManager : MonoBehaviour, IGameManInterface
 {
 
     [Header("Game Manager")]
     private AbstractState _current_state;
 
+    public static GameManager instance = null;
+
     [Header("Enemies")]
     private List<EnemyStats> spawnedEnemies = new List<EnemyStats>();
 
 
+    void Awake()
+    {
+        if(instance == null){
+             instance = this;
+             DontDestroyOnLoad(gameObject);
+        } else {
+             Destroy(this.gameObject);
+             return;
+        }
+    }
+
     void Start()
     {
-        _current_state = new MainMenuState(this);
+        ChangeState(new MainMenuState(this));
     }
 
     void Update()

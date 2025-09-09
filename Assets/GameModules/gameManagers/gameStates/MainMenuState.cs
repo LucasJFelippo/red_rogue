@@ -19,12 +19,7 @@ public class MainMenuState : AbstractState
     {
         if (Input.GetKeyDown(KeyCode.T))
         {
-            SceneManager.LoadScene("testScene", LoadSceneMode.Single);
-        }
-
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            Debug.Log("Pressed D");
+            _gameManInter.ChangeState(new PlayState(_gameManInter));
         }
     }
 }

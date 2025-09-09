@@ -11,11 +11,14 @@ public class PlayState : AbstractState
 
     public override void StartState()
     {
-        SceneManager.LoadScene("MainMenuScene", LoadSceneMode.Single);
+        SceneManager.LoadScene("testScene", LoadSceneMode.Single);
     }
 
     public override void UpdateState()
     {
-
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            _gameManInter.ChangeState(new MainMenuState(_gameManInter));
+        }
     }
 }
