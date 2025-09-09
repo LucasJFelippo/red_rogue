@@ -100,8 +100,8 @@ public class EnemyStats : MonoBehaviour
         if (animatorComponent != null)
         {
             animatorComponent.SetFloat("MovementSpeed", 0);
-            animatorComponent.SetTrigger("Death"); 
+            animatorComponent.SetTrigger("Death");
         }
-        Destroy(gameObject, 5f); 
+        Destroy(gameObject, 5f);
     }
 }
