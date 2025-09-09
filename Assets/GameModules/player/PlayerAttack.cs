@@ -9,6 +9,7 @@ public class PlayerAttack : MonoBehaviour
     [Header("Configurações do Ataque")]
     public Transform attackPoint;
     public float attackRange = 0.5f;
+    public int attackDamage = 25; // Dano do ataque
     public LayerMask enemyLayers;
 
     private Animator animator;
@@ -44,12 +45,17 @@ public class PlayerAttack : MonoBehaviour
     private void PerformHitCheck()
     {
         Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRange, enemyLayers);
-        foreach (Collider enemy in hitEnemies)
+        foreach (Collider enemyCollider in hitEnemies)
         {
-            if (!enemiesHitThisAttack.Contains(enemy))
+            if (!enemiesHitThisAttack.Contains(enemyCollider))
             {
-                Debug.Log("Acertamos " + enemy.name);
-                enemiesHitThisAttack.Add(enemy);
+                EnemyStats enemyStats = enemyCollider.GetComponent<EnemyStats>();
+                if (enemyStats != null)
+                {
+                    enemyStats.TakeDamage(attackDamage);
+                    Debug.Log("Acertamos " + enemyCollider.name + "e causamos" + attackDamage + " de dano.");
+                }
+                enemiesHitThisAttack.Add(enemyCollider);
             }
         }
     }
