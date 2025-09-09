@@ -18,6 +18,8 @@ public class EnemyNavMeshAI : MonoBehaviour
     [Header("Patrol Settings")]
     public Transform[] patrolPoints;
     public float patrolSpeed = 3.5f;
+    public float patrolStoppingDistance = 1f;
+
 
     [Header("Pursuit Settings")]
     public float pursuitSpeed = 7f;
@@ -26,6 +28,9 @@ public class EnemyNavMeshAI : MonoBehaviour
     [Header("Melee Lurking Settings")]
     public float meleeLurkSpeed = 4f;
     public float meleeLurkRadius = 10f;
+
+    [Tooltip("How often the melee enemy will dash to a new position while lurking.")]
+    public float meleeRepositionTime = 3f;
 
     [Header("Ranged Circling Settings")]
     public float rangedCirclingSpeed = 5f;
@@ -42,6 +47,8 @@ public class EnemyNavMeshAI : MonoBehaviour
 
     [Header("Animation Settings")]
     public string animatorSpeedParameter = "MovementSpeed";
+    public string animatorVelocityXParameter = "VelocityX";
+    public string animatorVelocityZParameter = "VelocityZ";
 
     private NavMeshAgent navMeshAgent;
     private Animator animator;
@@ -50,9 +57,12 @@ public class EnemyNavMeshAI : MonoBehaviour
     private int currentPatrolIndex;
 
     private float timeInCurrentState = 0f;
+    private float timeSinceLastMeleeReposition = 0f;
     private int circlingDirection = 1;
     private int animatorSpeedParamHash;
     private int animatorAIStateParamHash;
+    private int animatorVelocityXHash;
+    private int animatorVelocityZHash;
     private bool justAttacked = false;
     
 
@@ -70,6 +80,8 @@ public class EnemyNavMeshAI : MonoBehaviour
     {
         animatorSpeedParamHash = Animator.StringToHash(animatorSpeedParameter);
         animatorAIStateParamHash = Animator.StringToHash("AIState");
+        animatorVelocityXHash = Animator.StringToHash(animatorVelocityXParameter);
+        animatorVelocityZHash = Animator.StringToHash(animatorVelocityZParameter);
         currentPatrolIndex = 0;
         SetState(AIState.Patrolling);
         InvokeRepeating(nameof(CheckConditions), 0, checkInterval);
@@ -110,6 +122,7 @@ public class EnemyNavMeshAI : MonoBehaviour
                 animator.SetInteger("AIState", 0);
                 navMeshAgent.speed = patrolSpeed;
                 navMeshAgent.stoppingDistance = 0;
+                navMeshAgent.stoppingDistance = patrolStoppingDistance;
                 if (patrolPoints.Length > 0) navMeshAgent.SetDestination(patrolPoints[currentPatrolIndex].position);
                 break;
             case AIState.Pursuing:
@@ -122,6 +135,7 @@ public class EnemyNavMeshAI : MonoBehaviour
                 navMeshAgent.speed = (combatStyle == CombatStyle.Melee) ? meleeLurkSpeed : rangedCirclingSpeed;
                 navMeshAgent.stoppingDistance = 0;
                 circlingDirection = (Random.value > 0.5f) ? 1 : -1;
+                timeSinceLastMeleeReposition = 0f;
                 break;
             case AIState.Attacking:
                 animator.SetInteger("AIState", 3);
@@ -196,9 +210,27 @@ public class EnemyNavMeshAI : MonoBehaviour
         }
     }
 
+    private void LurkMelee()
+    {
+        if (justAttacked)
+        {
+            justAttacked = false;
+            ForceMeleeReposition();
+            return;
+        }
+        timeSinceLastMeleeReposition += Time.deltaTime;
+        if (timeSinceLastMeleeReposition >= meleeRepositionTime)
+        {
+            ForceMeleeReposition();
+        }
+    }
     private void Attack()
     {
-        if (playerTarget == null) return;
+        if (playerTarget == null)
+        {
+            SetState(AIState.Patrolling);
+            return;
+        }
         FaceTarget(playerTarget.position);
 
         if (timeInCurrentState < Time.deltaTime * 2)
@@ -215,13 +247,19 @@ public class EnemyNavMeshAI : MonoBehaviour
             SetState(AIState.Lurking);
         }
     }
-
     private void ForceMeleeReposition()
     {
         if (playerTarget == null) return;
-        Vector2 randomPoint2D = Random.insideUnitCircle * meleeLurkRadius;
-        Vector3 randomPoint3D = new Vector3(playerTarget.position.x + randomPoint2D.x, transform.position.y, playerTarget.position.z + randomPoint2D.y);
-        if (NavMesh.SamplePosition(randomPoint3D, out NavMeshHit hit, meleeLurkRadius, NavMesh.AllAreas))
+
+        timeSinceLastMeleeReposition = 0f;
+        float repositionRadius = enemyAttack.attackRange * 0.9f;
+
+        Vector2 randomPoint2D = Random.insideUnitCircle * repositionRadius;
+        Vector3 randomPoint3D = new Vector3(playerTarget.position.x + randomPoint2D.x,
+                                            transform.position.y,
+                                            playerTarget.position.z + randomPoint2D.y);
+
+        if (NavMesh.SamplePosition(randomPoint3D, out NavMeshHit hit, repositionRadius, NavMesh.AllAreas))
         {
             navMeshAgent.SetDestination(hit.position);
         }
@@ -265,8 +303,15 @@ public class EnemyNavMeshAI : MonoBehaviour
 
     private void UpdateAnimator()
     {
-        float speed = (currentState == AIState.Attacking) ? 0f : navMeshAgent.velocity.magnitude;
+        float speed = navMeshAgent.velocity.magnitude;
+        Vector3 localVelocity = transform.InverseTransformDirection(navMeshAgent.velocity);
+
+        float velocityX = localVelocity.x;
+        float velocityZ = localVelocity.z;
+
         animator.SetFloat(animatorSpeedParamHash, speed);
+        animator.SetFloat(animatorVelocityXHash, velocityX);
+        animator.SetFloat(animatorVelocityZHash, velocityZ);
     }
 
     private bool CanSeePlayer(float distanceToPlayer)
