@@ -397,16 +397,6 @@ public class s2ArenaGen : MonoBehaviour
         win.minSize = new Vector2(200, 200);
         win.Show();
 
-
-
-
-        EnemyStats enemy = new EnemyStats();
-        IGameManInterface gm = GameManager.instance;
-        gm.RegistryEnemy(enemy);
-
-        gm.UnregistryEnemy(enemy);
-
-
     }
 
     private class MapWindow : EditorWindow
@@ -414,32 +404,93 @@ public class s2ArenaGen : MonoBehaviour
         public static TileList Tiles;
         const float M = 10f;
 
+        // Persisted between GUI calls:
+        Vector2 _scrollPos;
+        Dictionary<Rect, Color> _floorColors;
+
+        // wall base colors
+        static readonly Color _outerRightBase = new Color(1f, 0.4f, 0.4f);
+        static readonly Color _outerLeftBase  = new Color(0.4f, 1f, 0.4f);
+        static readonly Color _innerRightBase = new Color(0.4f, 0.4f, 1f);
+        static readonly Color _innerLeftBase  = new Color(1f, 1f, 0.4f);
+
+        void OnEnable()
+        {
+            GenerateFloorColors();
+        }
+
+        void GenerateFloorColors()
+        {
+            _floorColors = new Dictionary<Rect, Color>();
+            foreach (var r in Tiles.floorTiles)
+            {
+                // one random color per floor tile
+                _floorColors[r] = UnityEngine.Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.6f, 0.8f);
+            }
+        }
+
         void OnGUI()
         {
-            float minX = 0;
-            float minY = 0;
-            float maxX = width;
-            float maxY = height;
-
-            float availW = position.width  - 2*M;
-            float availH = position.height - 2*M;
-            float totalW = maxX - minX;
-            float totalH = maxY - minY;
-            float s = Mathf.Min(availW/totalW, availH/totalH);
-
-            // draw each rect
-            for (int i = 0; i < Rects.Count; i++)
+            if (Tiles.floorTiles == null)
             {
-                var r = Rects[i];
-                var dr = new Rect(
-                    M + (r.x - minX)*s,
-                    M + (r.y - minY)*s,
-                    r.width * s,
-                    r.height * s
-                );
-                var c = Color.HSVToRGB(i/(float)Rects.Count, 0.7f, 0.8f);
-                EditorGUI.DrawRect(dr, c);
+                EditorGUILayout.LabelField("No tiles to display. Run ShowRectMap() first.");
+                return;
             }
+
+            // figure out how big the canvas needs to be
+            float maxX = 0f, maxY = 0f;
+            foreach (var list in new[] {
+                Tiles.floorTiles,
+                Tiles.outerRightWallTiles,
+                Tiles.outerLeftWallTiles,
+                Tiles.innerRightWallTiles,
+                Tiles.innerLeftWallTiles })
+            {
+                foreach (var r in list)
+                {
+                    maxX = Mathf.Max(maxX, r.x + r.width);
+                    maxY = Mathf.Max(maxY, r.y + r.height);
+                }
+            }
+            var canvasPx = new Rect(0, 0, maxX * M, maxY * M);
+
+            _scrollPos = GUI.BeginScrollView(
+                new Rect(0, 0, position.width, position.height),
+                _scrollPos,
+                canvasPx,
+                alwaysShowHorizontal: true,
+                alwaysShowVertical: true
+            );
+
+            // draw floor
+            foreach (var r in Tiles.floorTiles)
+            {
+                var drawR = new Rect(r.x * M, r.y * M, r.width * M, r.height * M);
+                EditorGUI.DrawRect(drawR, _floorColors[r]);
+            }
+
+            // helper to draw walls
+            void DrawWalls(List<Rect> list, Color baseColor)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var r = list[i];
+                    var drawR = new Rect(r.x * M, r.y * M, r.width * M, r.height * M);
+                    // alternate light/dark
+                    float t = (i % 2 == 0) ? 0.3f : -0.3f;
+                    Color c = (t > 0)
+                        ? Color.Lerp(baseColor, Color.white, t)
+                        : Color.Lerp(baseColor, Color.black, -t);
+                    EditorGUI.DrawRect(drawR, c);
+                }
+            }
+
+            DrawWalls(Tiles.outerRightWallTiles, _outerRightBase);
+            DrawWalls(Tiles.outerLeftWallTiles,  _outerLeftBase);
+            DrawWalls(Tiles.innerRightWallTiles, _innerRightBase);
+            DrawWalls(Tiles.innerLeftWallTiles,  _innerLeftBase);
+
+            GUI.EndScrollView();
         }
     }
     #endregion
