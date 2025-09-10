@@ -77,6 +77,8 @@ public class floorGen : MonoBehaviour
         Transform wallsParent = new GameObject("Walls").transform;
         wallsParent.SetParent(transform, false);
 
+        floorTiles.Add(CreateFloorCollider(new Rect(0,0,width,depth), floorParent));
+
         foreach (Rect rect in _tile_array)
         {
             if (rect.x == 0 || rect.y == 0)
@@ -413,6 +415,22 @@ public class floorGen : MonoBehaviour
         var collider = gameObj.AddComponent<BoxCollider>();
         collider.size = new Vector3(rect.width, wallHeight, rect.height);
         collider.center = new Vector3(rect.width * 0.5f, wallHeight * 0.5f, rect.height * 0.5f);
+
+        return gameObj;
+    }
+    #endregion
+
+    #region Floor Collider
+    GameObject CreateFloorCollider(Rect rect, Transform parent)
+    {
+        var gameObj = new GameObject($"Floor Collider");
+        gameObj.transform.SetParent(parent, false);
+
+        gameObj.transform.localPosition = new Vector3(rect.x, 0, rect.y);
+
+        var collider = gameObj.AddComponent<BoxCollider>();
+        collider.size = new Vector3(rect.width, 0.2f, rect.height);
+        collider.center = new Vector3(rect.width * 0.5f, height + maxElevation, rect.height * 0.5f);
 
         return gameObj;
     }
