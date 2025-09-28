@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 1749717672188095962}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -20.882124, y: -12.563187, z: -24.146246}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -193,32 +193,44 @@ PrefabInstance:
       value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 23.872
+      value: 1.17
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 13.05
+      value: 0.35
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 39.746
+      value: 0.16
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9858368
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.1677075
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -226,7 +238,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -19.309
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -300,6 +312,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -321,6 +335,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -428,10 +443,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2077345552744537968}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 25
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -634,15 +649,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 21.82
+      value: -1.04
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 13.05
+      value: 0.35
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 39.747
+      value: 0.59
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -745,6 +760,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -766,6 +783,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -873,10 +891,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3606135300508906771}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 25
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1074,15 +1092,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 21.71
+      value: -0.96
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 13.05
+      value: 0.35
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 38.19
+      value: -0.67
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1185,6 +1203,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1206,6 +1226,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -1313,10 +1334,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4772904693074045214}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 25
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1514,15 +1535,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 22.94963
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 13.05
+      value: 0.35
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 40.51358
+      value: 1.51
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1620,6 +1641,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1641,6 +1664,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -1748,10 +1772,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6000859922588979536}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 25
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1954,15 +1978,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 23.7
+      value: 0.93
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 13.05
+      value: 0.35
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 38.65
+      value: -1.07
       objectReference: {fileID: 0}
     - target: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2065,6 +2089,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2086,6 +2112,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -2193,10 +2220,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6597503525408363902}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 25
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
