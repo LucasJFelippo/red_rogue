@@ -67,8 +67,6 @@ public class PlayerAttack : MonoBehaviour
         isAttacking = false;
     }
 
-    // Chamada pelo último frame da animação para liberar o controle
-
     void OnDrawGizmos()
     {
         if (!isHitboxActive) return;

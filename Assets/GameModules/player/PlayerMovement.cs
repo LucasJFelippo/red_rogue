@@ -1,7 +1,3 @@
-// Data da Atualização: 22 de Julho de 2025
-// Local: Rio Grande, RS, Brasil
-// Versão Final do Script: Sem Ground Check e com trava de ataque.
-
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
@@ -92,6 +88,10 @@ public class PlayerMovement : MonoBehaviour
                 Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
             }
+        }
+        else
+        {
+            rb.linearVelocity = Vector3.zero;
         }
 
         // --- ATUALIZAÇÃO DO ANIMATOR ---

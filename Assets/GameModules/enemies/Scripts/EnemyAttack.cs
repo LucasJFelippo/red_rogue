@@ -68,6 +68,7 @@ public class EnemyAttack : MonoBehaviour
 
             GameObject projectile = Instantiate(projectilePrefab, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
 
+            // Atirar na direção do player na altura do inimigo (não do pé do player)
             Vector3 alvo = target.position;
             alvo.y = transform.position.y;
             projectile.transform.LookAt(alvo);
