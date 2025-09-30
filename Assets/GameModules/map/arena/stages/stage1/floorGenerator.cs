@@ -1,20 +1,18 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
-
 using System.Collections.Generic;
 using System.Linq;
 using System;
-
+using UnityEngine.AI;
+using Unity.AI.Navigation;
 
 public class floorGen : MonoBehaviour
 {
-    #region Public Vars
-
     [Header("Arena Size")]
-    public float width = 20; // X-Axis
-    public float height = 0.5f; // Y-Axis
-    public float depth = 20; // Z-Axis
+    public float width = 20;
+    public float height = 0.5f;
+    public float depth = 20;
 
     [Header("Tiles Size")]
     public float minPerimeter = 4;
@@ -31,34 +29,35 @@ public class floorGen : MonoBehaviour
     [Header("Rendering")]
     public Texture2D topAtlas;
     public Texture2D sideAtlas;
-
-    public Rect[] uvRects; // Using it entire for now
-    public int[,] pattern; // Only using one pattern for now
-
+    public Rect[] uvRects;
+    public int[,] pattern;
     public Material topMaterial;
     public Material sideMaterial;
 
-    #endregion
-
-    #region Private Vars
+    [Header("Dependencies")]
+    [Tooltip("The spawner that will populate the level with enemies.")]
+    public EnemySpawner enemySpawner;
+    [Tooltip("The component responsible for baking the NavMesh at runtime.")]
+    public NavMeshBaker navMeshBaker;
 
     private List<GameObject> floorTiles = new List<GameObject>();
     private List<GameObject> wallTiles = new List<GameObject>();
-
-    #endregion
 
     void Start()
     {
         topMaterial.mainTexture = topAtlas;
         sideMaterial.mainTexture = sideAtlas;
-        
         GenerateFloor();
+    }
+
+    public List<GameObject> GetFloorTiles()
+    {
+        return floorTiles;
     }
 
     [ContextMenu("Generate Floor")]
     public void GenerateFloor()
     {
-        // Destroy existing floor
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(transform.GetChild(i).gameObject);
@@ -69,55 +68,72 @@ public class floorGen : MonoBehaviour
         List<Rect> _tile_array = new List<Rect>();
         SplitHalf(new Rect(0f, 0f, width, depth), _tile_array);
 
-        float arenaMaxDist = Vector2.Distance(new Vector2(0, 0), new Vector2(width, depth));
-
         Transform floorParent = new GameObject("Floor").transform;
         floorParent.SetParent(transform, false);
+        floorParent.gameObject.AddComponent<NavMeshSurface>(); // Add NavMeshSurface for the tiles
 
         Transform wallsParent = new GameObject("Walls").transform;
         wallsParent.SetParent(transform, false);
 
-        floorTiles.Add(CreateFloorCollider(new Rect(0,0,width,depth), floorParent));
+        CreateFloorCollider(new Rect(0, 0, width, depth), floorParent);
 
         foreach (Rect rect in _tile_array)
         {
             if (rect.x == 0 || rect.y == 0)
             {
                 wallTiles.Add(CreateInnerWallTile(rect, wallsParent));
-                continue;
-            }
+                continue; }
             if (rect.x + rect.width > width - 0.1f)
             {
                 wallTiles.Add(CreateOuterWallTile(rect, wallsParent));
-                continue;
-            }
-
+                continue; }
             if (rect.y + rect.height > depth - 0.1f)
             {
                 wallTiles.Add(CreateOuterWallTile(rect, wallsParent));
-                continue;
-            }
-
+                continue; }
             floorTiles.Add(CreateTile(rect, floorParent));
         }
 
         if (Application.isPlaying)
         {
-            StartCoroutine(FloorRisingAnimation(floorTiles));
+            StartCoroutine(GenerationSequence());
         }
         else
         {
-            foreach (var tile in floorTiles)
-            {
-                tile.SetActive(true);
-            }
+            foreach (var tile in floorTiles) { tile.SetActive(true); }
+        }
+    }
+
+    private IEnumerator GenerationSequence()
+    {
+        yield return StartCoroutine(FloorRisingAnimation(floorTiles));
+
+        if (navMeshBaker != null)
+        {
+            navMeshBaker.BakeNavMesh();
+        }
+        else
+        {
+            Debug.LogError("NavMeshBaker is not assigned on the FloorGenerator!", this);
+            yield break;
+        }
+
+        yield return new WaitForEndOfFrame();
+
+        if (enemySpawner != null)
+        {
+            enemySpawner.SpawnEnemies();
+        }
+        else
+        {
+            Debug.LogWarning("EnemySpawner is not assigned. No enemies will be spawned.", this);
         }
     }
 
     #region Random Gen Alg
     void SplitHalf(Rect rect, List<Rect> tile_array)
     {
-        if ( rect.width + rect.height < minPerimeter || rect.width < minWidth || rect.height < minDepth)
+        if (rect.width + rect.height < minPerimeter || rect.width < minWidth || rect.height < minDepth)
         {
             tile_array.Add(rect);
             return;
@@ -173,7 +189,7 @@ public class floorGen : MonoBehaviour
 
         var meshRenderer = gameObj.AddComponent<MeshRenderer>();
 
-        meshRenderer.sharedMaterials = new Material[]{
+        meshRenderer.sharedMaterials = new Material[] {
             topMaterial,
             sideMaterial,
             sideMaterial
@@ -188,9 +204,6 @@ public class floorGen : MonoBehaviour
 
     Mesh BuildTileMesh(Rect rect, float elevation)
     {
-        float x = rect.x;
-        float y = 0f;
-        float z = rect.y;
         float w = rect.width;
         float h = height;
         float d = rect.height;
@@ -230,10 +243,10 @@ public class floorGen : MonoBehaviour
             Vector3.back, Vector3.back, Vector3.back, Vector3.back
         });
 
-        Vector2 _00 = new Vector2( 0f, 0f );
-        Vector2 _10 = new Vector2( 1f, 0f );
-        Vector2 _01 = new Vector2( 0f, 1f );
-        Vector2 _11 = new Vector2( 1f, 1f );
+        Vector2 _00 = new Vector2(0f, 0f);
+        Vector2 _10 = new Vector2(1f, 0f);
+        Vector2 _01 = new Vector2(0f, 1f);
+        Vector2 _11 = new Vector2(1f, 1f);
 
         var uvs = new List<Vector2>();
         uvs.AddRange(new[]
@@ -289,7 +302,7 @@ public class floorGen : MonoBehaviour
     }
     #endregion
 
-    #region Outer Walls
+    #region Walls & Collider
     GameObject CreateOuterWallTile(Rect rect, Transform parent)
     {
         var gameObj = new GameObject($"Outer_Wall_{parent.childCount:D3}");
@@ -299,7 +312,7 @@ public class floorGen : MonoBehaviour
 
         var meshFilter = gameObj.AddComponent<MeshFilter>();
 
-        meshFilter.mesh = BuildOuterWallTileMesh(rect); 
+        meshFilter.mesh = BuildOuterWallTileMesh(rect);
 
         var meshRenderer = gameObj.AddComponent<MeshRenderer>();
 
@@ -314,9 +327,6 @@ public class floorGen : MonoBehaviour
 
     Mesh BuildOuterWallTileMesh(Rect rect)
     {
-        float x = rect.x;
-        float y = 0f;
-        float z = rect.y;
         float w = rect.width;
         float h = wallHeight;
         float d = rect.height;
@@ -356,10 +366,10 @@ public class floorGen : MonoBehaviour
             Vector3.back, Vector3.back, Vector3.back, Vector3.back
         });
 
-        Vector2 _00 = new Vector2( 0f, 0f );
-        Vector2 _10 = new Vector2( 1f, 0f );
-        Vector2 _01 = new Vector2( 0f, 1f );
-        Vector2 _11 = new Vector2( 1f, 1f );
+        Vector2 _00 = new Vector2(0f, 0f);
+        Vector2 _10 = new Vector2(1f, 0f);
+        Vector2 _01 = new Vector2(0f, 1f);
+        Vector2 _11 = new Vector2(1f, 1f);
 
         var uvs = new List<Vector2>();
         uvs.AddRange(new[]
@@ -402,12 +412,10 @@ public class floorGen : MonoBehaviour
         mesh.RecalculateBounds();
         return mesh;
     }
-    #endregion
 
-    #region Inner Walls
     GameObject CreateInnerWallTile(Rect rect, Transform parent)
     {
-        var gameObj = new GameObject($"Outer_Wall_{parent.childCount:D3}");
+        var gameObj = new GameObject($"Inner_Wall_{parent.childCount:D3}");
         gameObj.transform.SetParent(parent, false);
 
         gameObj.transform.localPosition = new Vector3(rect.x, 0, rect.y);
@@ -418,12 +426,10 @@ public class floorGen : MonoBehaviour
 
         return gameObj;
     }
-    #endregion
 
-    #region Floor Collider
     GameObject CreateFloorCollider(Rect rect, Transform parent)
     {
-        var gameObj = new GameObject($"Floor Collider");
+        var gameObj = new GameObject($"Floor_Collider");
         gameObj.transform.SetParent(parent, false);
 
         gameObj.transform.localPosition = new Vector3(rect.x, 0, rect.y);
@@ -454,9 +460,9 @@ public class floorGen : MonoBehaviour
 
             yield return new WaitForSeconds(delay);
         }
+        yield return new WaitForSeconds(duration);
     }
     #endregion
-
 
     #region Testing and Debuggin
     [ContextMenu("Show Rect Map")]
@@ -477,7 +483,6 @@ public class floorGen : MonoBehaviour
     {
         public static List<Rect> Rects;
         const float M = 10f;
-
         void OnGUI()
         {
             if (Rects == null || Rects.Count == 0)
@@ -492,23 +497,23 @@ public class floorGen : MonoBehaviour
             float maxX = Rects.Max(r => r.x + r.width);
             float maxY = Rects.Max(r => r.y + r.height);
 
-            float availW = position.width  - 2*M;
-            float availH = position.height - 2*M;
+            float availW = position.width - 2 * M;
+            float availH = position.height - 2 * M;
             float totalW = maxX - minX;
             float totalH = maxY - minY;
-            float s = Mathf.Min(availW/totalW, availH/totalH);
+            float s = Mathf.Min(availW / totalW, availH / totalH);
 
             // draw each rect
             for (int i = 0; i < Rects.Count; i++)
             {
                 var r = Rects[i];
                 var dr = new Rect(
-                    M + (r.x - minX)*s,
-                    M + (r.y - minY)*s,
+                    M + (r.x - minX) * s,
+                    M + (r.y - minY) * s,
                     r.width * s,
                     r.height * s
                 );
-                var c = Color.HSVToRGB(i/(float)Rects.Count, 0.7f, 0.8f);
+                var c = Color.HSVToRGB(i / (float)Rects.Count, 0.7f, 0.8f);
                 EditorGUI.DrawRect(dr, c);
             }
         }

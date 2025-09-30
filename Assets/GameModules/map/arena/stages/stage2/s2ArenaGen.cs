@@ -24,6 +24,7 @@ public struct TileList
     }
 }
 
+
 public class s2ArenaGen : MonoBehaviour
 {
 
@@ -115,6 +116,7 @@ public class s2ArenaGen : MonoBehaviour
             tiles.outerRightWallTiles.Add(new Rect(x * tilesSize, rows * tilesSize, tilesSize, tilesSize));
         }
 
+        globalHelpers.printRectList(tiles.floorTiles);
         return tiles;
     }
     #endregion
