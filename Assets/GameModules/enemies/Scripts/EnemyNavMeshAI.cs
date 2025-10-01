@@ -6,11 +6,11 @@ using UnityEngine.AI;
 [RequireComponent(typeof(EnemyAttack))]
 public class EnemyNavMeshAI : MonoBehaviour
 {
-    public enum AIState { Patrolling, Pursuing, Lurking, Attacking }
+    public enum AIState { Idle, Patrolling, Pursuing, Lurking, Attacking }
     public enum CombatStyle { Melee, Ranged }
 
     [Header("State Machine")]
-    [SerializeField] private AIState currentState = AIState.Patrolling;
+    [SerializeField] private AIState currentState = AIState.Idle;
 
     [Header("Combat Style")]
     public CombatStyle combatStyle = CombatStyle.Melee;
@@ -20,7 +20,6 @@ public class EnemyNavMeshAI : MonoBehaviour
     public float patrolSpeed = 3.5f;
     public float patrolStoppingDistance = 1f;
 
-
     [Header("Pursuit Settings")]
     public float pursuitSpeed = 7f;
     public float engagementDistance = 15f;
@@ -28,8 +27,6 @@ public class EnemyNavMeshAI : MonoBehaviour
     [Header("Melee Lurking Settings")]
     public float meleeLurkSpeed = 4f;
     public float meleeLurkRadius = 10f;
-
-    [Tooltip("How often the melee enemy will dash to a new position while lurking.")]
     public float meleeRepositionTime = 3f;
 
     [Header("Ranged Circling Settings")]
@@ -55,23 +52,21 @@ public class EnemyNavMeshAI : MonoBehaviour
     private Transform playerTarget;
     private EnemyAttack enemyAttack;
     private int currentPatrolIndex;
-
     private float timeInCurrentState = 0f;
     private float timeSinceLastMeleeReposition = 0f;
     private int circlingDirection = 1;
+    private bool justAttacked = false;
     private int animatorSpeedParamHash;
     private int animatorAIStateParamHash;
     private int animatorVelocityXHash;
     private int animatorVelocityZHash;
-    private bool justAttacked = false;
-    
+
 
     void Awake()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         enemyAttack = GetComponent<EnemyAttack>();
-
         GameObject playerObject = GameObject.FindGameObjectWithTag(playerTag);
         if (playerObject != null) playerTarget = playerObject.transform;
     }
@@ -83,12 +78,18 @@ public class EnemyNavMeshAI : MonoBehaviour
         animatorVelocityXHash = Animator.StringToHash(animatorVelocityXParameter);
         animatorVelocityZHash = Animator.StringToHash(animatorVelocityZParameter);
         currentPatrolIndex = 0;
+    }
+
+    public void ActivateAI()
+    {
         SetState(AIState.Patrolling);
         InvokeRepeating(nameof(CheckConditions), 0, checkInterval);
     }
 
     void Update()
     {
+        if (currentState == AIState.Idle) return;
+
         if (playerTarget == null)
         {
             if (currentState != AIState.Patrolling)
@@ -112,26 +113,32 @@ public class EnemyNavMeshAI : MonoBehaviour
     private void SetState(AIState newState)
     {
         if (currentState == newState) return;
-
         currentState = newState;
         timeInCurrentState = 0f;
 
         switch (currentState)
         {
+            case AIState.Idle:
+                animator.SetInteger("AIState", -1);
+                navMeshAgent.isStopped = true;
+                break;
             case AIState.Patrolling:
                 animator.SetInteger("AIState", 0);
+                navMeshAgent.isStopped = false;
                 navMeshAgent.speed = patrolSpeed;
-                navMeshAgent.stoppingDistance = 0;
                 navMeshAgent.stoppingDistance = patrolStoppingDistance;
-                if (patrolPoints.Length > 0) navMeshAgent.SetDestination(patrolPoints[currentPatrolIndex].position);
+                if (patrolPoints != null && patrolPoints.Length > 0)
+                    navMeshAgent.SetDestination(patrolPoints[currentPatrolIndex].position);
                 break;
             case AIState.Pursuing:
                 animator.SetInteger("AIState", 1);
+                navMeshAgent.isStopped = false;
                 navMeshAgent.speed = pursuitSpeed;
                 navMeshAgent.stoppingDistance = engagementDistance;
                 break;
             case AIState.Lurking:
                 animator.SetInteger("AIState", 2);
+                navMeshAgent.isStopped = false;
                 navMeshAgent.speed = (combatStyle == CombatStyle.Melee) ? meleeLurkSpeed : rangedCirclingSpeed;
                 navMeshAgent.stoppingDistance = 0;
                 circlingDirection = (Random.value > 0.5f) ? 1 : -1;
@@ -144,19 +151,17 @@ public class EnemyNavMeshAI : MonoBehaviour
         }
     }
 
+    // ... all other methods remain the same ...
     private void CheckConditions()
     {
-        if (playerTarget == null || currentState == AIState.Attacking) return;
-
+        if (playerTarget == null || currentState == AIState.Attacking || currentState == AIState.Idle) return;
         float distanceToPlayer = Vector3.Distance(transform.position, playerTarget.position);
         bool canSeePlayer = CanSeePlayer(distanceToPlayer);
-
         if (!canSeePlayer && distanceToPlayer > maxDetectionRadius)
         {
             SetState(AIState.Patrolling);
             return;
         }
-
         switch (currentState)
         {
             case AIState.Patrolling:
@@ -168,7 +173,6 @@ public class EnemyNavMeshAI : MonoBehaviour
                 break;
             case AIState.Lurking:
                 if (distanceToPlayer > engagementDistance * 1.2f) SetState(AIState.Pursuing);
-
                 else if (!justAttacked && enemyAttack.CanAttack && distanceToPlayer <= enemyAttack.attackRange)
                 {
                     SetState(AIState.Attacking);
@@ -176,40 +180,26 @@ public class EnemyNavMeshAI : MonoBehaviour
                 break;
         }
     }
-
     private void Patrol()
     {
-        if (patrolPoints.Length == 0) return;
+        if (patrolPoints == null || patrolPoints.Length == 0) return;
         if (!navMeshAgent.pathPending && navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
         {
             currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Length;
             navMeshAgent.SetDestination(patrolPoints[currentPatrolIndex].position);
         }
     }
-
     private void Pursue()
     {
         if (playerTarget != null) navMeshAgent.SetDestination(playerTarget.position);
     }
-
     private void Lurk()
     {
+        if (playerTarget == null) return;
         FaceTarget(playerTarget.position);
-
-        if (combatStyle == CombatStyle.Melee)
-        {
-            if (justAttacked)
-            {
-                ForceMeleeReposition();
-                justAttacked = false;
-            }
-        }
-        else
-        {
-            LurkRanged();
-        }
+        if (combatStyle == CombatStyle.Melee) { LurkMelee(); }
+        else { LurkRanged(); }
     }
-
     private void LurkMelee()
     {
         if (justAttacked)
@@ -226,72 +216,52 @@ public class EnemyNavMeshAI : MonoBehaviour
     }
     private void Attack()
     {
-        if (playerTarget == null)
-        {
-            SetState(AIState.Patrolling);
-            return;
-        }
+        if (playerTarget == null) { SetState(AIState.Patrolling); return; }
         FaceTarget(playerTarget.position);
-
         if (timeInCurrentState < Time.deltaTime * 2)
         {
             enemyAttack.PerformAttack(playerTarget);
         }
-
         if (timeInCurrentState >= enemyAttack.attackDuration)
         {
-            if (combatStyle == CombatStyle.Melee)
-            {
-                justAttacked = true;
-            }
+            if (combatStyle == CombatStyle.Melee) { justAttacked = true; }
             SetState(AIState.Lurking);
         }
     }
     private void ForceMeleeReposition()
     {
         if (playerTarget == null) return;
-
         timeSinceLastMeleeReposition = 0f;
         float repositionRadius = enemyAttack.attackRange * 0.9f;
-
         Vector2 randomPoint2D = Random.insideUnitCircle * repositionRadius;
-        Vector3 randomPoint3D = new Vector3(playerTarget.position.x + randomPoint2D.x,
-                                            transform.position.y,
-                                            playerTarget.position.z + randomPoint2D.y);
-
+        Vector3 randomPoint3D = new Vector3(playerTarget.position.x + randomPoint2D.x, transform.position.y, playerTarget.position.z + randomPoint2D.y);
         if (NavMesh.SamplePosition(randomPoint3D, out NavMeshHit hit, repositionRadius, NavMesh.AllAreas))
         {
             navMeshAgent.SetDestination(hit.position);
         }
     }
-
     private void LurkRanged()
     {
         if (playerTarget == null) return;
         float timeStuck = 0f;
         if (navMeshAgent.hasPath && navMeshAgent.velocity.sqrMagnitude < 0.1f) timeStuck += Time.deltaTime;
         else timeStuck = 0f;
-
         if (timeStuck > 0.75f)
         {
             circlingDirection *= -1;
             timeStuck = 0f;
         }
-
         if (timeInCurrentState > directionChangeInterval)
         {
             timeInCurrentState = 0;
             circlingDirection = (Random.value > 0.5f) ? 1 : -1;
         }
-
         Vector3 directionToPlayer = transform.position - playerTarget.position;
         Vector3 idealPosition = playerTarget.position + directionToPlayer.normalized * desiredRangedDistance;
         Vector3 perpendicularDirection = Vector3.Cross(directionToPlayer, Vector3.up).normalized * circlingDirection;
         Vector3 finalDestination = idealPosition + perpendicularDirection * 5f;
-
         navMeshAgent.SetDestination(finalDestination);
     }
-
     private void FaceTarget(Vector3 target)
     {
         Vector3 direction = (target - transform.position).normalized;
@@ -300,20 +270,16 @@ public class EnemyNavMeshAI : MonoBehaviour
         Quaternion lookRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * navMeshAgent.angularSpeed);
     }
-
     private void UpdateAnimator()
     {
-        float speed = navMeshAgent.velocity.magnitude;
+        float speed = (currentState == AIState.Attacking || currentState == AIState.Idle) ? 0f : navMeshAgent.velocity.magnitude;
         Vector3 localVelocity = transform.InverseTransformDirection(navMeshAgent.velocity);
-
         float velocityX = localVelocity.x;
         float velocityZ = localVelocity.z;
-
         animator.SetFloat(animatorSpeedParamHash, speed);
         animator.SetFloat(animatorVelocityXHash, velocityX);
         animator.SetFloat(animatorVelocityZHash, velocityZ);
     }
-
     private bool CanSeePlayer(float distanceToPlayer)
     {
         if (playerTarget == null) return false;
@@ -323,7 +289,6 @@ public class EnemyNavMeshAI : MonoBehaviour
         if (Physics.Raycast(transform.position, directionToPlayer, distanceToPlayer, obstacleMask)) return false;
         return true;
     }
-
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.white;
@@ -342,12 +307,11 @@ public class EnemyNavMeshAI : MonoBehaviour
             }
         }
         Vector3 viewAngleA = DirectionFromAngle(-viewAngle / 2, false);
-        Vector3 viewAngleB = DirectionFromAngle(viewAngle / 2, false);
+        Vector3 viewAngleB = DirectionFromAngle(-viewAngle / 2, false);
         Gizmos.color = Color.yellow;
         Gizmos.DrawLine(transform.position, transform.position + viewAngleA * maxDetectionRadius);
         Gizmos.DrawLine(transform.position, transform.position + viewAngleB * maxDetectionRadius);
     }
-
     private Vector3 DirectionFromAngle(float angleInDegrees, bool angleIsGlobal)
     {
         if (!angleIsGlobal) angleInDegrees += transform.eulerAngles.y;

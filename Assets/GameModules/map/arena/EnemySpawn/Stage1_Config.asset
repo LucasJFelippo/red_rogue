@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20b6fd80106d4784c988fc6d33165da1, type: 3}
-  m_Name: Stage1Config
+  m_Name: Stage1_Config
   m_EditorClassIdentifier: Assembly-CSharp::StageSpawnConfig
-  totalWeightBudget: 300
+  totalWeightBudget: 200
   enemySpawnPool:
-  - enemyPrefab: {fileID: 1749717672188095962, guid: 758c9d7151d20274b8985643858747ec, type: 3}
-    weight: 25
   - enemyPrefab: {fileID: 3501354168370149901, guid: e94a602a42067e5448101b1d27aeed06, type: 3}
     weight: 50
+  - enemyPrefab: {fileID: 1749717672188095962, guid: 758c9d7151d20274b8985643858747ec, type: 3}
+    weight: 20

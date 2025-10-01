@@ -12,12 +12,15 @@ public class EnemySpawner : MonoBehaviour
     public floorGen floorGenerator;
 
     [Header("Spawning Parameters")]
-    [Tooltip("The minimum number of patrol points to generate for each enemy.")]
+    [Tooltip("The minimum number of patrol points to generate for each enemy GROUP.")]
     [SerializeField] private int minPatrolPoints = 2;
-    [Tooltip("The maximum number of patrol points to generate for each enemy.")]
+    [Tooltip("The maximum number of patrol points to generate for each enemy GROUP.")]
     [SerializeField] private int maxPatrolPoints = 5;
     [Tooltip("The search radius for finding valid patrol points around a spawn tile.")]
     [SerializeField] private float patrolPointSearchRadius = 10f;
+
+    private Transform enemyContainer;
+    private Transform patrolPointContainer;
 
     public void SpawnEnemies()
     {
@@ -25,6 +28,18 @@ public class EnemySpawner : MonoBehaviour
         {
             Debug.LogError("StageConfig or FloorGenerator is not assigned in the EnemySpawner!", this);
             return;
+        }
+
+        if (enemyContainer == null)
+        {
+            enemyContainer = new GameObject("SpawnedEnemies").transform;
+            enemyContainer.SetParent(this.transform);
+        }
+
+        if (patrolPointContainer == null)
+        {
+            patrolPointContainer = new GameObject("GeneratedPatrolPoints").transform;
+            patrolPointContainer.SetParent(this.transform);
         }
 
         List<GameObject> spawnableTiles = floorGenerator.GetFloorTiles();
@@ -37,58 +52,63 @@ public class EnemySpawner : MonoBehaviour
         int currentBudget = stageConfig.totalWeightBudget;
         int safetyBreak = 0;
 
-        while (currentBudget > 0 && safetyBreak < 100)
+        while (currentBudget > 0 && spawnableTiles.Count > 0 && safetyBreak < 100)
         {
-            List<EnemySpawnData> affordableEnemies = new List<EnemySpawnData>();
-            foreach (var enemyData in stageConfig.enemySpawnPool)
-            {
-                if (enemyData.weight <= currentBudget)
-                {
-                    affordableEnemies.Add(enemyData);
-                }
-            }
+            List<EnemySpawnData> affordableEnemies = stageConfig.enemySpawnPool
+                .Where(e => e.weight <= currentBudget)
+                .ToList();
 
             if (affordableEnemies.Count == 0) break;
 
-            EnemySpawnData enemyToSpawn = affordableEnemies[Random.Range(0, affordableEnemies.Count)];
+            EnemySpawnData enemyGroupToSpawn = affordableEnemies[Random.Range(0, affordableEnemies.Count)];
 
-            if (enemyToSpawn == null) break;
+            int tileIndex = Random.Range(0, spawnableTiles.Count);
+            GameObject randomTile = spawnableTiles[tileIndex];
+            spawnableTiles.RemoveAt(tileIndex);
 
-            GameObject randomTile = spawnableTiles[Random.Range(0, spawnableTiles.Count)];
             Vector3 spawnPosition = randomTile.transform.position + new Vector3(Random.Range(-2f, 2f), 1f, Random.Range(-2f, 2f));
 
-            GameObject spawnedEnemyObj = Instantiate(enemyToSpawn.enemyPrefab, spawnPosition, Quaternion.identity);
+            // Spawn the group prefab
+            GameObject spawnedGroupObject = Instantiate(enemyGroupToSpawn.enemyPrefab, spawnPosition, Quaternion.identity, enemyContainer);
 
-            GeneratePatrolPoints(spawnedEnemyObj, randomTile.transform.position);
+            // Generate ONE set of patrol points for the entire group
+            Transform[] patrolPoints = GeneratePatrolPointsForGroup(spawnedGroupObject, spawnPosition);
 
-            currentBudget -= enemyToSpawn.weight;
+            // Find all individual enemies within the group and assign them the SAME patrol points
+            EnemyNavMeshAI[] enemiesInGroup = spawnedGroupObject.GetComponentsInChildren<EnemyNavMeshAI>();
+            foreach (EnemyNavMeshAI enemy in enemiesInGroup)
+            {
+                enemy.patrolPoints = patrolPoints;
+                enemy.ActivateAI();
+            }
+
+            currentBudget -= enemyGroupToSpawn.weight;
             safetyBreak++;
         }
     }
 
-    private void GeneratePatrolPoints(GameObject enemyObject, Vector3 origin)
+    private Transform[] GeneratePatrolPointsForGroup(GameObject groupObject, Vector3 spawnOrigin)
     {
-        EnemyNavMeshAI enemyAI = enemyObject.GetComponent<EnemyNavMeshAI>();
-        if (enemyAI == null) return;
-
         int patrolPointCount = Random.Range(minPatrolPoints, maxPatrolPoints + 1);
         List<Transform> generatedPoints = new List<Transform>();
+
+        Transform patrolPointsParent = new GameObject($"{groupObject.name}_PatrolPoints").transform;
+        patrolPointsParent.SetParent(patrolPointContainer);
 
         for (int i = 0; i < patrolPointCount; i++)
         {
             Vector3 randomDirection = Random.insideUnitSphere * patrolPointSearchRadius;
-            randomDirection += origin;
+            randomDirection += spawnOrigin;
 
-            if (NavMesh.SamplePosition(randomDirection, out NavMeshHit hit, patrolPointSearchRadius, 1))
+            if (NavMesh.SamplePosition(randomDirection, out NavMeshHit hit, patrolPointSearchRadius, NavMesh.AllAreas))
             {
-                GameObject patrolPointObj = new GameObject($"PatrolPoint_{enemyObject.name}_{i}");
+                GameObject patrolPointObj = new GameObject($"PatrolPoint_{i}");
                 patrolPointObj.transform.position = hit.position;
-                patrolPointObj.transform.SetParent(enemyObject.transform);
+                patrolPointObj.transform.SetParent(patrolPointsParent);
                 generatedPoints.Add(patrolPointObj.transform);
             }
         }
 
-        enemyAI.patrolPoints = generatedPoints.ToArray();
+        return generatedPoints.ToArray();
     }
 }
-
