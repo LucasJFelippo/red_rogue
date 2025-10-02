@@ -9,7 +9,7 @@ public class SmoothCameraFollow : MonoBehaviour
     public float smoothSpeed = 5f;
 
     public float startSize = 10f;
-    public float targetSize = 2.5f;
+    public float targetSize = 3f;
     public float duration = 5f;
 
     private Camera cam;

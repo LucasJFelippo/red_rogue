@@ -12,8 +12,11 @@ EditorBuildSettings:
     path: Assets/GameModules/map/menus/MainMenuScene.unity
     guid: cf04b4637cb580c42a5c6384ffba83d9
   - enabled: 1
-    path: Assets/GameModules/map/test_env/testScene.unity
-    guid: 8ccb53ae56138a641aa203e872326149
+    path: Assets/GameModules/map/arena/stages/stage1/s1Arena.unity
+    guid: 15cf4c45439bbbc438a37e17040e033e
+  - enabled: 1
+    path: Assets/GameModules/map/arena/stages/stage2/s2Arena.unity
+    guid: e9da06de52ee9c94e9f1a4cf9115c846
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

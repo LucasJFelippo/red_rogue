@@ -16,6 +16,8 @@ public class GameManager : MonoBehaviour, IGameManInterface
     [Header("Enemies")]
     private List<EnemyStats> spawnedEnemies = new List<EnemyStats>();
 
+    private int gamePhase = 1;
+    private int gameStage = 1;
 
     void Awake()
     {
@@ -30,7 +32,7 @@ public class GameManager : MonoBehaviour, IGameManInterface
 
     void Start()
     {
-        ChangeState(new MainMenuState(this));
+        ChangeState(new LoadStage(this));
     }
 
     void Update()
@@ -42,6 +44,11 @@ public class GameManager : MonoBehaviour, IGameManInterface
     {
         _current_state = newState;
         _current_state.StartState();
+    }
+
+    public (int, int) GetGameInfo()
+    {
+        return (gamePhase, gameStage);
     }
 
     public void RegistryEnemy(EnemyStats enemy)

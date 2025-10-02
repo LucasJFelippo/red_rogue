@@ -8,8 +8,6 @@ public class EnemySpawner : MonoBehaviour
     [Header("Dependencies")]
     [Tooltip("The configuration asset that defines the spawning rules for this stage.")]
     public StageSpawnConfig stageConfig;
-    [Tooltip("A reference to the floor generator to get the list of valid floor tiles.")]
-    public floorGen floorGenerator;
 
     [Header("Spawning Parameters")]
     [Tooltip("The minimum number of patrol points to generate for each enemy GROUP.")]
@@ -22,11 +20,11 @@ public class EnemySpawner : MonoBehaviour
     private Transform enemyContainer;
     private Transform patrolPointContainer;
 
-    public void SpawnEnemies()
+    public void SpawnEnemies(List<GameObject> spawnableTiles)
     {
-        if (stageConfig == null || floorGenerator == null)
+        if (stageConfig == null)
         {
-            Debug.LogError("StageConfig or FloorGenerator is not assigned in the EnemySpawner!", this);
+            Debug.LogError("StageConfig is not assigned in the EnemySpawner!", this);
             return;
         }
 
@@ -42,7 +40,6 @@ public class EnemySpawner : MonoBehaviour
             patrolPointContainer.SetParent(this.transform);
         }
 
-        List<GameObject> spawnableTiles = floorGenerator.GetFloorTiles();
         if (spawnableTiles.Count == 0)
         {
             Debug.LogWarning("No spawnable tiles found. Cannot spawn enemies.", this);
