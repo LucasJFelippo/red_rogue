@@ -8,7 +8,7 @@ using UnityEngine.AI;
 using Unity.AI.Navigation;
 
 
-public class s1Gen : MonoBehaviour
+public class s1Gen : MonoBehaviour, IArenaGenInterface
 {
     [Header("Arena Size")]
     public float arenaWidth = 20;
@@ -46,6 +46,10 @@ public class s1Gen : MonoBehaviour
     [Header("Dependencies")]
     public EnemySpawner enemySpawner;
 
+    void Awake()
+    {
+        GameManager.instance.ChangeArenaGen(this);
+    }
 
     void Start()
     {

@@ -14,8 +14,7 @@ public class LoadStage : AbstractState
         var (gamePhase, gameStage) = _gameManInter.GetGameInfo();
         SceneManager.LoadScene($"s{gameStage}Arena", LoadSceneMode.Single);
 
-        GameObject arena = GameObject.Find("Arena");
-        Debug.Log(arena.transform.childCount);
+        _gameManInter.GenerateArena();
     }
 
     public override void UpdateState()
