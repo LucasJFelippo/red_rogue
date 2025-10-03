@@ -41,15 +41,12 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
 
     [Header("Internals")]
     private TileLists arenaTiles = new TileLists(true);
+    private GameObject floorGameObject = null;
 
 
     [Header("Dependencies")]
     public EnemySpawner enemySpawner;
 
-    void Awake()
-    {
-        GameManager.instance.ChangeArenaGen(this);
-    }
 
     void Start()
     {
@@ -57,11 +54,13 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
         sideMaterial.mainTexture = sideAtlas;
     }
 
-    #region Arena Generation
+    #region Arena Crafting
     [ContextMenu("Generate Arena")]
     public void GenerateArena()
     {
 
+        Debug.Log("Cleaning current arena registry");
+    
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(transform.GetChild(i).gameObject);
@@ -71,7 +70,8 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
         List<Rect> _tileArray = new List<Rect>();
         SplitHalf(new Rect(0f, 0f, arenaWidth, arenaDepth), _tileArray);
 
-        Transform floorParent = new GameObject("Floor").transform;
+        floorGameObject = new GameObject("Floor");
+        Transform floorParent = floorGameObject.transform;
         floorParent.SetParent(transform, false);
 
         Transform wallsParent = new GameObject("Walls").transform;
@@ -106,21 +106,29 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
         }
 
 
-
-        var floorNavMeshSurf = floorParent.gameObject.AddComponent<NavMeshSurface>();
-        floorNavMeshSurf.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-        floorNavMeshSurf.BuildNavMesh();
-
-
-
         if (Application.isPlaying)
         {
+            foreach (var tile in arenaTiles.floorTiles) { tile.GetComponent<MeshRenderer>().enabled = true; }
         }
         else
         {
             // Enable floor in Edit Mode
             foreach (var tile in arenaTiles.floorTiles) { tile.GetComponent<MeshRenderer>().enabled = true; }
         }
+    }
+
+    public IEnumerator GenerateNavMesh()
+    {
+
+        var surface = floorGameObject.AddComponent<NavMeshSurface>();
+        surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+
+        var data = new NavMeshData();
+        surface.navMeshData = data;
+        NavMesh.AddNavMeshData(data, surface.transform.position, surface.transform.rotation);
+
+        yield return surface.UpdateNavMesh(surface.navMeshData);
+
     }
 
     #endregion

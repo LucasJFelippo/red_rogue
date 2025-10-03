@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+using System.Collections;
+
 public class LoadStage : AbstractState
 {
 
@@ -11,10 +13,7 @@ public class LoadStage : AbstractState
 
     public override void StartState()
     {
-        var (gamePhase, gameStage) = _gameManInter.GetGameInfo();
-        SceneManager.LoadScene($"s{gameStage}Arena", LoadSceneMode.Single);
-
-        _gameManInter.GenerateArena();
+        _gameManInter.StartCoroutine(LoadStageRoutine());
     }
 
     public override void UpdateState()
@@ -25,8 +24,17 @@ public class LoadStage : AbstractState
         }
     }
 
-    public void LoadArena()
+    private IEnumerator LoadStageRoutine()
     {
+        var (gamePhase, gameStage) = _gameManInter.GetGameInfo();
+        var sceneLoad = SceneManager.LoadSceneAsync($"s{gameStage}Arena", LoadSceneMode.Single);
+
+        yield return sceneLoad;
+
+        IArenaGenInterface arenaObj = GameObject.FindWithTag("Arena").GetComponent<IArenaGenInterface>();
+        arenaObj.GenerateArena();
+
+        var navMeshBaking = _gameManInter.StartCoroutine(arenaObj.GenerateNavMesh());
 
     }
 }

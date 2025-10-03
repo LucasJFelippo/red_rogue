@@ -1,5 +1,6 @@
 using UnityEngine;
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 
@@ -18,20 +19,17 @@ public class GameManager : MonoBehaviour, IGameManInterface
     [Header("Enemies")]
     private List<EnemyStats> spawnedEnemies = new List<EnemyStats>();
 
-    [Header("Map")]
-    private IArenaGenInterface _arenaGen = null;
-
     private int gamePhase = 1;
     private int gameStage = 1;
 
     void Awake()
     {
         if(_instance == null){
-             _instance = this;
-             DontDestroyOnLoad(gameObject);
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
         } else {
-             Destroy(this.gameObject);
-             return;
+            Destroy(this.gameObject);
+            return;
         }
     }
 
@@ -51,17 +49,6 @@ public class GameManager : MonoBehaviour, IGameManInterface
         _current_state.StartState();
     }
 
-    #region Map
-    public void ChangeArenaGen(IArenaGenInterface generator)
-    {
-        _arenaGen = generator;
-    }
-    public void GenerateArena()
-    {
-        _arenaGen.GenerateArena();
-    }
-    #endregion
-
     public (int, int) GetGameInfo()
     {
         return (gamePhase, gameStage);
@@ -76,4 +63,6 @@ public class GameManager : MonoBehaviour, IGameManInterface
     {
         bool removed = spawnedEnemies.Remove(enemy);
     }
+
+    public Coroutine StartCoroutine(IEnumerator routine) => base.StartCoroutine(routine);
 }
