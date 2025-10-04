@@ -40,8 +40,8 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
     public Material sideMaterial;
 
     [Header("Internals")]
-    private TileLists arenaTiles = new TileLists(true);
-    private GameObject floorGameObject = null;
+    private TileLists _arenaTiles = new TileLists(true);
+    private GameObject _floorGameObject = null;
 
 
     [Header("Dependencies")]
@@ -60,18 +60,18 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
     {
 
         Debug.Log("Cleaning current arena registry");
-    
+
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(transform.GetChild(i).gameObject);
         }
-        arenaTiles.clearTiles();
+        _arenaTiles.clearTiles();
 
         List<Rect> _tileArray = new List<Rect>();
         SplitHalf(new Rect(0f, 0f, arenaWidth, arenaDepth), _tileArray);
 
-        floorGameObject = new GameObject("Floor");
-        Transform floorParent = floorGameObject.transform;
+        _floorGameObject = new GameObject("Floor");
+        Transform floorParent = _floorGameObject.transform;
         floorParent.SetParent(transform, false);
 
         Transform wallsParent = new GameObject("Walls").transform;
@@ -85,49 +85,45 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
         {
             if (tileDim.x == 0)
             {
-                arenaTiles.innerLeftWallTiles.Add(CreateInnerWallTile(tileDim, wallsParent));
+                _arenaTiles.innerLeftWallTiles.Add(CreateInnerWallTile(tileDim, wallsParent));
             }
             else if (tileDim.y == 0)
             {
-                arenaTiles.innerRightWallTiles.Add(CreateInnerWallTile(tileDim, wallsParent));
+                _arenaTiles.innerRightWallTiles.Add(CreateInnerWallTile(tileDim, wallsParent));
             }
             else if (tileDim.x + tileDim.width > arenaWidth - 0.1f)
             {
-                arenaTiles.outerRightWallTiles.Add(CreateOuterWallTile(tileDim, wallsParent));
+                _arenaTiles.outerRightWallTiles.Add(CreateOuterWallTile(tileDim, wallsParent));
             }
             else if (tileDim.y + tileDim.height > arenaDepth - 0.1f)
             {
-                arenaTiles.outerLeftWallTiles.Add(CreateOuterWallTile(tileDim, wallsParent));
+                _arenaTiles.outerLeftWallTiles.Add(CreateOuterWallTile(tileDim, wallsParent));
             }
             else
             {
-                arenaTiles.floorTiles.Add(CreateFloorTile(tileDim, floorParent));
+                _arenaTiles.floorTiles.Add(CreateFloorTile(tileDim, floorParent));
             }
         }
 
 
         if (Application.isPlaying)
         {
-            foreach (var tile in arenaTiles.floorTiles) { tile.GetComponent<MeshRenderer>().enabled = true; }
+            foreach (var tile in _arenaTiles.floorTiles) { tile.GetComponent<MeshRenderer>().enabled = true; }
         }
         else
         {
             // Enable floor in Edit Mode
-            foreach (var tile in arenaTiles.floorTiles) { tile.GetComponent<MeshRenderer>().enabled = true; }
+            foreach (var tile in _arenaTiles.floorTiles) { tile.GetComponent<MeshRenderer>().enabled = true; }
         }
     }
 
-    public IEnumerator GenerateNavMesh()
+
+    public void GenerateNavMesh()
     {
 
-        var surface = floorGameObject.AddComponent<NavMeshSurface>();
+        var surface = _floorGameObject.AddComponent<NavMeshSurface>();
         surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-
-        var data = new NavMeshData();
-        surface.navMeshData = data;
-        NavMesh.AddNavMeshData(data, surface.transform.position, surface.transform.rotation);
-
-        yield return surface.UpdateNavMesh(surface.navMeshData);
+        surface.BuildNavMesh();
 
     }
 
@@ -445,5 +441,15 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
             SplitHalf(lowerRect, tile_array);
         }
     }
+    #endregion
+
+
+    #region External Helpers
+
+    public List<GameObject> GetFloorTiles()
+    {
+        return _arenaTiles.floorTiles;
+    }
+
     #endregion
 }

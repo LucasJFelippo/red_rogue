@@ -33,8 +33,10 @@ public class LoadStage : AbstractState
 
         IArenaGenInterface arenaObj = GameObject.FindWithTag("Arena").GetComponent<IArenaGenInterface>();
         arenaObj.GenerateArena();
+        arenaObj.GenerateNavMesh();
 
-        var navMeshBaking = _gameManInter.StartCoroutine(arenaObj.GenerateNavMesh());
+        EnemySpawner enemySpw = GameObject.FindWithTag("EnemyController").GetComponent<EnemySpawner>();
+        enemySpw.SpawnEnemies(arenaObj.GetFloorTiles(), gameStage);
 
     }
 }

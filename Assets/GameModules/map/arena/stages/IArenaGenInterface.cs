@@ -1,8 +1,10 @@
 using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public interface IArenaGenInterface
 {
     void GenerateArena();
-    IEnumerator GenerateNavMesh();
+    void GenerateNavMesh();
+
+    List<GameObject> GetFloorTiles();
 }

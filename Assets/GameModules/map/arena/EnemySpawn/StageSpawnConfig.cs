@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class StageSpawnConfig : ScriptableObject
 {
     [Tooltip("The total 'cost' of all enemies that can be spawned in this stage.")]
-    public int totalWeightBudget = 100;
+    public int baseWeightBudget = 100;
 
     [Tooltip("The list of all possible enemies that can appear in this stage and their associated 'cost'.")]
     public List<EnemySpawnData> enemySpawnPool;

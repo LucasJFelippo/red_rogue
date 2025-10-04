@@ -20,7 +20,7 @@ public class EnemySpawner : MonoBehaviour
     private Transform enemyContainer;
     private Transform patrolPointContainer;
 
-    public void SpawnEnemies(List<GameObject> spawnableTiles)
+    public void SpawnEnemies(List<GameObject> spawnableTiles, int stage)
     {
         if (stageConfig == null)
         {
@@ -46,7 +46,8 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
 
-        int currentBudget = stageConfig.totalWeightBudget;
+        // TODO: MAGIC STUFF, CHANGE LATER
+        int currentBudget = (int)(stageConfig.baseWeightBudget * Mathf.Pow(2f, (stage - 1) / 4f));
         int safetyBreak = 0;
 
         while (currentBudget > 0 && spawnableTiles.Count > 0 && safetyBreak < 100)
