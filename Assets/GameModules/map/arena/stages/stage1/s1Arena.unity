@@ -3402,12 +3402,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 198159543}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d04836d61cc49cf4b823464dd12cb3be, type: 3}
+  m_Script: {fileID: 11500000, guid: 97b41ba4db272dd47bb28cf718db19fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
-  stageConfig: {fileID: 11400000, guid: d084705cad383804382d127941154ef5, type: 2}
-  minPatrolPoints: 10
-  maxPatrolPoints: 15
+  stageConfig: {fileID: 11400000, guid: fe4085b983fb8f7479afda72a9b68bd5, type: 2}
+  minPatrolPoints: 2
+  maxPatrolPoints: 5
   patrolPointSearchRadius: 10
 --- !u!4 &198159545
 Transform:
@@ -26222,7 +26222,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1202348489
 Transform:
   m_ObjectHideFlags: 0

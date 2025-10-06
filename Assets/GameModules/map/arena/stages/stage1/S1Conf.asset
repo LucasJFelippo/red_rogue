@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20b6fd80106d4784c988fc6d33165da1, type: 3}
   m_Name: S1Conf
   m_EditorClassIdentifier: Assembly-CSharp::StageSpawnConfig
-  totalWeightBudget: 100
+  baseWeightBudget: 20
   enemySpawnPool: []

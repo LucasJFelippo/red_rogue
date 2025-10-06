@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviour, IGameManInterface
     private AbstractState _current_state;
 
     [Header("Player")]
+    public GameObject playerPrefab;
+    public GameObject getPlayerPrefab => playerPrefab;
 
     [Header("Enemies")]
     private List<EnemyStats> spawnedEnemies = new List<EnemyStats>();

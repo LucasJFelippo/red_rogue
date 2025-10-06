@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SmoothCameraFollow : MonoBehaviour
+public class CameraController : MonoBehaviour
 {
     [Header("Target Info")]
     public Transform target;
