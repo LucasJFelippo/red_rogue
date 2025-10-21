@@ -67,8 +67,6 @@ public class EnemyNavMeshAI : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         enemyAttack = GetComponent<EnemyAttack>();
-        GameObject playerObject = GameObject.FindGameObjectWithTag(playerTag);
-        if (playerObject != null) playerTarget = playerObject.transform;
     }
 
     void Start()
@@ -88,6 +86,8 @@ public class EnemyNavMeshAI : MonoBehaviour
 
     void Update()
     {
+        GameObject playerObject = GameObject.FindWithTag(playerTag);
+        if (playerObject != null) playerTarget = playerObject.transform;
         if (currentState == AIState.Idle) return;
 
         if (playerTarget == null)
