@@ -459,10 +459,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackPoint: {fileID: 6010389174402576535}
   attackRange: 0.78
-  attackDamage: 1
   enemyLayers:
     serializedVersion: 2
     m_Bits: 64
+  attackDashDistance: 1.5
+  attackDashDuration: 0.15
+  attackDamage: 20
+  attackDashForce: 5
 --- !u!1001 &3929919021691347977
 PrefabInstance:
   m_ObjectHideFlags: 0
