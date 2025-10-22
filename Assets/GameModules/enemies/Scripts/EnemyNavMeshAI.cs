@@ -7,7 +7,7 @@ using System.Collections;
 [RequireComponent(typeof(EnemyAttack))]
 public class EnemyNavMeshAI : MonoBehaviour
 {
-    public enum AIState { Idle, Patrolling, Pursuing, Lurking, Telegraphing, Attacking, Repositioning }
+    public enum AIState { Idle, Patrolling, Pursuing, Lurking, Telegraphing, Attacking, Repositioning, Fleeing }
     public enum CombatStyle { Melee, Ranged }
 
     [Header("State Machine")]
@@ -48,6 +48,12 @@ public class EnemyNavMeshAI : MonoBehaviour
     public float strafeWeight = 1.0f;
     [Tooltip("Chance (0 a 1) de trocar de direção a cada 'tick'")]
     public float directionChangeChance = 0.05f;
+    [Space]
+    [Tooltip("Se o player estiver MAIS PERTO que isso, a IA entra em pânico e só tenta fugir.")]
+    public float playerPanicDistance = 3.0f;
+    [Tooltip("A que distância a IA 'vê' a parede para tentar desviar.")]
+    public float wallAvoidDistance = 1.5f;
+    public float fleeSpeed = 6.0f;
 
     [Header("Reposition Settings")]
     public float repositionSpeed = 4f;
@@ -134,6 +140,7 @@ public class EnemyNavMeshAI : MonoBehaviour
             case AIState.Telegraphing: Telegraph(); break;
             case AIState.Attacking: Attack(); break;
             case AIState.Repositioning: Repositioning(); break;
+            case AIState.Fleeing: Flee(); break;
         }
         UpdateAnimator();
     }
@@ -218,6 +225,24 @@ public class EnemyNavMeshAI : MonoBehaviour
                     }
                 }
                 break;
+
+            case AIState.Fleeing:
+                animator.SetInteger("AIState", 6);
+                navMeshAgent.isStopped = false;
+                navMeshAgent.speed = fleeSpeed;
+                navMeshAgent.stoppingDistance = 0.5f;
+
+                Transform closestPatrolPoint = GetClosestPatrolPoint();
+                if (closestPatrolPoint != null)
+                {
+                    navMeshAgent.SetDestination(closestPatrolPoint.position);
+                }
+                else
+                {
+                    Debug.LogWarning("Fleeing state triggered but no patrol points found!", gameObject);
+                    SetState(AIState.Patrolling);
+                }
+                break;
         }
     }
 
@@ -259,31 +284,62 @@ public class EnemyNavMeshAI : MonoBehaviour
     {
         if (isDashing) return;
         if (playerTarget == null || currentState == AIState.Attacking || currentState == AIState.Idle) return;
+
         float distanceToPlayer = Vector3.Distance(transform.position, playerTarget.position);
         bool canSeePlayer = CanSeePlayer(distanceToPlayer);
+
         if (!canSeePlayer && distanceToPlayer > maxDetectionRadius)
         {
             SetState(AIState.Patrolling);
             return;
         }
+
         switch (currentState)
         {
             case AIState.Patrolling:
-                if (canSeePlayer) SetState(AIState.Pursuing);
+                if (canSeePlayer)
+                {
+                    SetState(AIState.Pursuing);
+                }
                 break;
+
             case AIState.Pursuing:
-                if (!canSeePlayer) SetState(AIState.Patrolling);
-                else if (distanceToPlayer <= engagementDistance) SetState(AIState.Lurking);
+                if (canSeePlayer && distanceToPlayer <= engagementDistance)
+                {
+                    SetState(AIState.Lurking);
+                }
                 break;
+
             case AIState.Lurking:
-                if (distanceToPlayer > engagementDistance * 1.2f) SetState(AIState.Pursuing);
-                else if (!canSeePlayer) SetState(AIState.Pursuing);
+                if (distanceToPlayer > engagementDistance * 1.2f)
+                {
+                    SetState(AIState.Pursuing);
+                }
+                else if (!canSeePlayer)
+                {
+                    SetState(AIState.Pursuing);
+                }
                 else if (!isAttacking && enemyAttack.CanAttack && distanceToPlayer <= enemyAttack.attackRange)
                 {
                     SetState(AIState.Telegraphing);
                 }
                 break;
+
+            case AIState.Telegraphing:
+                if (distanceToPlayer > enemyAttack.attackRange * 1.5f || !canSeePlayer)
+                {
+                    isAttacking = false;
+                    SetState(AIState.Pursuing);
+                }
+                break;
+
             case AIState.Repositioning:
+                break;
+            case AIState.Fleeing:
+                if (!canSeePlayer || distanceToPlayer > engagementDistance * 1.5f)
+                {
+                    SetState(AIState.Pursuing);
+                }
                 break;
         }
     }
@@ -323,7 +379,7 @@ public class EnemyNavMeshAI : MonoBehaviour
 
         if (timeSinceLastDash >= meleeDashInterval - dashApproachDuration)
         {
-            navMeshAgent.speed = pursuitSpeed; 
+            navMeshAgent.speed = pursuitSpeed;
             navMeshAgent.stoppingDistance = enemyAttack.attackRange * 1.5f;
             navMeshAgent.SetDestination(playerTarget.position);
             return;
@@ -336,7 +392,7 @@ public class EnemyNavMeshAI : MonoBehaviour
 
         if (timeUntilMeleeDirectionChange <= 0f || (!navMeshAgent.pathPending && navMeshAgent.remainingDistance < 0.5f))
         {
-            timeUntilMeleeDirectionChange = Random.Range(meleeDirectionChangeInterval * 0.8f, meleeDirectionChangeInterval * 1.2f);
+            timeUntilMeleeDirectionChange = Random.Range(meleeDirectionChangeInterval * 0.6f, meleeDirectionChangeInterval * 1.1f);
             circlingDirection = (Random.value > 0.5f) ? 1 : -1;
 
             Vector3 directionToPlayer = (transform.position - playerTarget.position).normalized;
@@ -349,6 +405,69 @@ public class EnemyNavMeshAI : MonoBehaviour
                 navMeshAgent.SetDestination(hit.position);
             }
         }
+    }
+
+    private void Flee()
+    {
+        if (playerTarget == null) { SetState(AIState.Patrolling); return; }
+
+        float distanceToPlayer = Vector3.Distance(transform.position, playerTarget.position);
+        if (!isAttacking && enemyAttack.CanAttack && distanceToPlayer <= enemyAttack.attackRange && CanSeePlayer(distanceToPlayer))
+        {
+            SetState(AIState.Telegraphing);
+            return;
+        }
+
+        bool stillAgainstWall = IsAgainstWall();
+
+        if (!stillAgainstWall)
+        {
+            SetState(AIState.Lurking);
+            return;
+        }
+
+        if (!navMeshAgent.pathPending && navMeshAgent.remainingDistance < navMeshAgent.stoppingDistance)
+        {
+            SetState(AIState.Fleeing);
+        }
+    }
+
+    private bool IsAgainstWall()
+    {
+        Vector3[] checkDirections = { -transform.forward, transform.right, -transform.right };
+        Vector3 rayOrigin = transform.position + Vector3.up * 1.0f;
+
+        foreach (Vector3 dir in checkDirections)
+        {
+            if (Physics.Raycast(rayOrigin, dir, wallAvoidDistance, obstacleMask))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Transform GetClosestPatrolPoint()
+    {
+        if (patrolPoints == null || patrolPoints.Length == 0) return null;
+
+        Transform bestTarget = null;
+        float closestDistanceSqr = Mathf.Infinity;
+        Vector3 currentPosition = transform.position;
+
+        foreach (Transform potentialTarget in patrolPoints)
+        {
+            if (potentialTarget == null) continue;
+
+            Vector3 directionToTarget = potentialTarget.position - currentPosition;
+            float dSqrToTarget = directionToTarget.sqrMagnitude;
+            if (dSqrToTarget < closestDistanceSqr)
+            {
+                closestDistanceSqr = dSqrToTarget;
+                bestTarget = potentialTarget;
+            }
+        }
+        return bestTarget;
     }
 
     private void Repositioning()
@@ -436,6 +555,30 @@ public class EnemyNavMeshAI : MonoBehaviour
     private void LurkRanged()
     {
         if (playerTarget == null) return;
+
+        // --- 1. VERIFICAÇÃO DE PÂNICO (GATILHO PARA O NOVO ESTADO) ---
+        float distanceToPlayer = Vector3.Distance(transform.position, playerTarget.position);
+
+        // Perto do player (J)?
+        bool isPanicked = (distanceToPlayer <= playerPanicDistance);
+
+        // Perto da parede (N)? Checa a direção de fuga (para trás)
+        Vector3 kitingDirection = (transform.position - playerTarget.position).normalized;
+        if (kitingDirection == Vector3.zero) kitingDirection = -transform.forward; // Segurança
+
+        Vector3 rayOrigin = transform.position + Vector3.up * 1.0f;
+        bool isAgainstWall = Physics.Raycast(rayOrigin, kitingDirection, wallAvoidDistance, obstacleMask);
+
+        if (isPanicked && isAgainstWall)
+        {
+            // CONDIÇÃO DE PÂNICO "STUCK" ATINGIDA!
+            SetState(AIState.Fleeing);
+            return; // Saia da lógica de Lurking
+        }
+
+        // --- 2. LÓGICA DE LURKING NORMAL (se não estiver em pânico) ---
+        // (Esta é a lógica de kiting/strafing/stuck-detect que já tínhamos)
+
         if (navMeshAgent.hasPath && navMeshAgent.velocity.sqrMagnitude < 0.1f * 0.1f)
         {
             timeStuck += Time.deltaTime;
@@ -444,40 +587,26 @@ public class EnemyNavMeshAI : MonoBehaviour
         {
             timeStuck = 0f;
         }
-
         bool isStuck = timeStuck > 0.5f;
-
-        if (isStuck)
-        {
-
-            timeStuck = 0f;
-
-            navMeshAgent.speed = pursuitSpeed;
-            navMeshAgent.stoppingDistance = engagementDistance;
-            navMeshAgent.SetDestination(playerTarget.position);
-            timeUntilRangedMoveTick = repositionTickRate;
-
-            return;
-        }
-
-        navMeshAgent.speed = rangedCirclingSpeed;
-        navMeshAgent.stoppingDistance = 0;
 
         timeUntilRangedMoveTick -= Time.deltaTime;
 
-        if (timeUntilRangedMoveTick <= 0f)
+        if (timeUntilRangedMoveTick <= 0f || isStuck)
         {
             timeUntilRangedMoveTick = Random.Range(repositionTickRate * 0.8f, repositionTickRate * 1.2f);
 
-            if (Random.value < directionChangeChance)
+            if (isStuck)
+            {
+                timeStuck = 0f;
+                circlingDirection *= -1;
+            }
+            else if (Random.value < directionChangeChance)
             {
                 circlingDirection *= -1;
             }
 
-            Vector3 directionToPlayer = playerTarget.position - transform.position;
-            float distanceToPlayer = directionToPlayer.magnitude;
-            Vector3 directionToPlayerNormalized = (distanceToPlayer > 0.01f) ? directionToPlayer.normalized : transform.forward;
-
+            // Cálculos de Vetor (Kiting)
+            Vector3 directionToPlayerNormalized = (playerTarget.position - transform.position).normalized;
             Vector3 kitingVector = Vector3.zero;
             float distanceError = distanceToPlayer - desiredRangedDistance;
             if (Mathf.Abs(distanceError) > distanceDeadzone)
@@ -485,33 +614,41 @@ public class EnemyNavMeshAI : MonoBehaviour
                 kitingVector = directionToPlayerNormalized * distanceError;
             }
 
+            // Vetor de Strafe
             Vector3 strafeVector = Vector3.Cross(directionToPlayerNormalized, transform.up).normalized * circlingDirection;
-            Vector3 rayOrigin = transform.position + Vector3.up * 1.0f;
-            float wallCheckDistance = 2.0f;
 
-            if (Physics.Raycast(rayOrigin, strafeVector, wallCheckDistance, obstacleMask))
+            if (Physics.Raycast(rayOrigin, strafeVector, 2.0f, obstacleMask))
             {
                 strafeVector = Vector3.zero;
                 circlingDirection *= -1;
                 timeUntilRangedMoveTick = 0f;
             }
 
+            // Combina Vetores
             Vector3 combinedDirection = (kitingVector * kitingWeight + strafeVector * strafeWeight).normalized;
 
-            float lookAheadDistance = 4f;
-            Vector3 targetPosition = transform.position + combinedDirection * lookAheadDistance;
-
-            if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, lookAheadDistance, NavMesh.AllAreas))
+            // Define Destino
+            if (combinedDirection.sqrMagnitude > 0.1f)
             {
-                navMeshAgent.SetDestination(hit.position);
+                float lookAheadDistance = 4f;
+                Vector3 targetPosition = transform.position + combinedDirection * lookAheadDistance;
+
+                if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, lookAheadDistance, NavMesh.AllAreas))
+                {
+                    navMeshAgent.SetDestination(hit.position);
+                }
+                else
+                {
+                    Vector3 kitingTarget = transform.position + (kitingVector.normalized * lookAheadDistance);
+                    if (kitingVector.sqrMagnitude > 0.1f && NavMesh.SamplePosition(kitingTarget, out NavMeshHit kitingHit, lookAheadDistance, NavMesh.AllAreas))
+                    {
+                        navMeshAgent.SetDestination(kitingHit.position);
+                    }
+                }
             }
             else
             {
-                Vector3 kitingTarget = transform.position + (kitingVector.normalized * lookAheadDistance);
-                if (NavMesh.SamplePosition(kitingTarget, out NavMeshHit kitingHit, lookAheadDistance, NavMesh.AllAreas))
-                {
-                    navMeshAgent.SetDestination(kitingHit.position);
-                }
+                navMeshAgent.ResetPath();
             }
         }
     }

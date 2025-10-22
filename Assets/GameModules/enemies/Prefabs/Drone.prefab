@@ -345,7 +345,11 @@ MonoBehaviour:
   dashApproachDuration: 0.75
   rangedCirclingSpeed: 7
   desiredRangedDistance: 12
-  directionChangeInterval: 1
+  distanceDeadzone: 1.5
+  repositionTickRate: 0.5
+  kitingWeight: 1.5
+  strafeWeight: 1
+  directionChangeChance: 0.05
   repositionSpeed: 4
   repositionDistance: 10
   repositionDuration: 1
