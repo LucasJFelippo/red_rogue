@@ -7,7 +7,7 @@ using System.Collections;
 [RequireComponent(typeof(EnemyAttack))]
 public class EnemyNavMeshAI : MonoBehaviour
 {
-    public enum AIState { Idle, Patrolling, Pursuing, Lurking, Telegraphing, Attacking, Repositioning, Fleeing }
+    public enum AIState { Idle, Patrolling, Pursuing, Lurking, Telegraphing, Attacking, Repositioning, Fleeing, TelegraphingSpit }
     public enum CombatStyle { Melee, Ranged }
 
     [Header("State Machine")]
@@ -36,6 +36,14 @@ public class EnemyNavMeshAI : MonoBehaviour
     public float meleeDashInterval = 2f;
     public float meleeDashSpeed = 15f;
     public float dashApproachDuration = 0.75f;
+
+    [Header("Melee Spit Attack")]
+    [Tooltip("Arraste o componente 'EnemyAttack' secundário (do cuspe) para cá.")]
+    public EnemyAttack spitAttackComponent;
+    public float spitChance = 0.6f;
+    public float spitCooldown = 5f;
+    public float spitTelegraphDuration = 0.6f;
+    private float timeSinceLastSpit = 0f;
 
     [Header("Ranged Circling Settings")]
     public float rangedCirclingSpeed = 5f;
@@ -93,6 +101,7 @@ public class EnemyNavMeshAI : MonoBehaviour
     private float timeUntilTacticChange = 0f;
     private float currentKiteWeight;
     private float currentStrafeWeight;
+    private bool isPerformingSpit = false;
 
 
     void Awake()
@@ -143,6 +152,7 @@ public class EnemyNavMeshAI : MonoBehaviour
             case AIState.Attacking: Attack(); break;
             case AIState.Repositioning: Repositioning(); break;
             case AIState.Fleeing: Flee(); break;
+            case AIState.TelegraphingSpit: TelegraphSpit(); break;
         }
         UpdateAnimator();
     }
@@ -204,6 +214,17 @@ public class EnemyNavMeshAI : MonoBehaviour
                 isAttacking = true;
                 FaceTarget(playerTarget.position);
                 break;
+
+            case AIState.TelegraphingSpit:
+                animator.SetInteger("AIState", 8);
+                navMeshAgent.isStopped = true;
+                navMeshAgent.ResetPath();
+                isAttacking = true;
+                isPerformingSpit = true;
+                timeSinceLastSpit = 0f;
+                FaceTarget(playerTarget.position);
+                break;
+
             case AIState.Repositioning:
                 animator.SetInteger("AIState", 5);
                 navMeshAgent.isStopped = false;
@@ -370,6 +391,7 @@ public class EnemyNavMeshAI : MonoBehaviour
     {
         if (isDashing || playerTarget == null) return;
         timeSinceLastDash += Time.deltaTime;
+        timeSinceLastSpit += Time.deltaTime;
 
         if (timeSinceLastDash >= meleeDashInterval)
         {
@@ -390,6 +412,16 @@ public class EnemyNavMeshAI : MonoBehaviour
         navMeshAgent.speed = meleeCirclingSpeed;
         navMeshAgent.stoppingDistance = 0;
 
+        if (spitAttackComponent != null && timeSinceLastSpit >= spitCooldown && Random.value < spitChance)
+        {
+            float distanceToPlayer = Vector3.Distance(transform.position, playerTarget.position);
+            if (distanceToPlayer <= spitAttackComponent.attackRange && CanSeePlayer(distanceToPlayer))
+            {
+                SetState(AIState.TelegraphingSpit);
+                return;
+            }
+        }
+
         timeUntilMeleeDirectionChange -= Time.deltaTime;
 
         if (timeUntilMeleeDirectionChange <= 0f || (!navMeshAgent.pathPending && navMeshAgent.remainingDistance < 0.5f))
@@ -406,6 +438,18 @@ public class EnemyNavMeshAI : MonoBehaviour
             {
                 navMeshAgent.SetDestination(hit.position);
             }
+        }
+    }
+
+    private void TelegraphSpit()
+    {
+        if (playerTarget == null) { SetState(AIState.Patrolling); return; }
+
+        FaceTarget(playerTarget.position);
+
+        if (timeInCurrentState >= spitTelegraphDuration)
+        {
+            SetState(AIState.Attacking);
         }
     }
 
@@ -494,23 +538,33 @@ public class EnemyNavMeshAI : MonoBehaviour
     {
         if (playerTarget == null) { SetState(AIState.Patrolling); return; }
 
-        if (timeInCurrentState < Time.deltaTime * 2)
+        if (isPerformingSpit)
         {
-            FaceTarget(playerTarget.position);
-            enemyAttack.PerformAttack(playerTarget);
-        }
-
-        if (timeInCurrentState >= enemyAttack.attackDuration)
-        {
-            isAttacking = false;
-
-            if (combatStyle == CombatStyle.Melee)
+            if (timeInCurrentState < Time.deltaTime * 2)
             {
-                SetState(AIState.Repositioning);
+                FaceTarget(playerTarget.position);
+                spitAttackComponent.PerformAttack(playerTarget);
             }
-            else
+
+            if (timeInCurrentState >= spitAttackComponent.attackDuration)
             {
+                isAttacking = false;
+                isPerformingSpit = false;
                 SetState(AIState.Lurking);
+            }
+        }
+        else
+        {
+            if (timeInCurrentState < Time.deltaTime * 2)
+            {
+                FaceTarget(playerTarget.position);
+                enemyAttack.PerformAttack(playerTarget);
+            }
+
+            if (timeInCurrentState >= enemyAttack.attackDuration)
+            {
+                isAttacking = false;
+                SetState(AIState.Repositioning);
             }
         }
     }
@@ -529,7 +583,6 @@ public class EnemyNavMeshAI : MonoBehaviour
     {
         if (playerTarget == null) return;
 
-        // Tenta encontrar um ponto de dash
         float repositionRadius = enemyAttack.attackRange * 0.9f;
         Vector2 randomPoint2D = Random.insideUnitCircle.normalized * repositionRadius;
         Vector3 randomPoint3D = new Vector3(playerTarget.position.x + randomPoint2D.x,

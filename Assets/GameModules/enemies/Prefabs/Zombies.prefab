@@ -1630,6 +1630,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1831807963609898838}
   m_SourcePrefab: {fileID: 100100000, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+--- !u!4 &2073563096475557914 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4789241475065248, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+  m_PrefabInstance: {fileID: 2078346821844174266}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2077345552744537968 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1112338128624330, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
@@ -1715,10 +1720,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackStyle: 0
   attackRange: 3
-  attackDuration: 0.1
+  attackDuration: 0.6
   animatorAttackTrigger: Attack
-  projectilePrefab: {fileID: 0}
-  projectileSpawnPoint: {fileID: 0}
+  projectilePrefab: {fileID: 2877784644291625097, guid: f73a39cb3ef6d414d8855edeeea2a4c4, type: 3}
+  projectileSpawnPoint: {fileID: 2073563096475557914}
 --- !u!195 &3631092027464448323
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1770,9 +1775,20 @@ MonoBehaviour:
   meleeDashInterval: 2
   meleeDashSpeed: 15
   dashApproachDuration: 0.75
+  spitAttackComponent: {fileID: 9033012396953741447}
+  spitChance: 0.8
+  spitCooldown: 1
+  spitTelegraphDuration: 0.2
   rangedCirclingSpeed: 5
   desiredRangedDistance: 10
-  directionChangeInterval: 4
+  distanceDeadzone: 1.5
+  repositionTickRate: 0.7
+  rangedTacticChangeInterval: 4
+  kitingWeight: 1.5
+  strafeWeight: 1
+  playerPanicDistance: 3
+  wallAvoidDistance: 1.5
+  fleeSpeed: 6
   repositionSpeed: 4
   repositionDistance: 4
   repositionDuration: 1
@@ -2173,10 +2189,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackStyle: 0
   attackRange: 3
-  attackDuration: 0.1
+  attackDuration: 0.6
   animatorAttackTrigger: Attack
-  projectilePrefab: {fileID: 0}
-  projectileSpawnPoint: {fileID: 0}
+  projectilePrefab: {fileID: 2877784644291625097, guid: f73a39cb3ef6d414d8855edeeea2a4c4, type: 3}
+  projectileSpawnPoint: {fileID: 3610022762217720441}
 --- !u!195 &6827232192284908639
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -2228,9 +2244,20 @@ MonoBehaviour:
   meleeDashInterval: 2
   meleeDashSpeed: 15
   dashApproachDuration: 0.75
+  spitAttackComponent: {fileID: 1587538963049320495}
+  spitChance: 0.8
+  spitCooldown: 1
+  spitTelegraphDuration: 0.2
   rangedCirclingSpeed: 5
   desiredRangedDistance: 10
-  directionChangeInterval: 4
+  distanceDeadzone: 1.5
+  repositionTickRate: 0.7
+  rangedTacticChangeInterval: 4
+  kitingWeight: 1.5
+  strafeWeight: 1
+  playerPanicDistance: 3
+  wallAvoidDistance: 1.5
+  fleeSpeed: 6
   repositionSpeed: 4
   repositionDistance: 4
   repositionDuration: 1
@@ -2294,6 +2321,11 @@ CapsuleCollider:
   m_Height: 0.43611634
   m_Direction: 1
   m_Center: {x: 0.0009598583, y: 0.20038676, z: -0.018073231}
+--- !u!4 &3610022762217720441 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4789241475065248, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+  m_PrefabInstance: {fileID: 3605240737657171929}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4773587102795297748
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2536,6 +2568,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 17166100339880793}
   m_SourcePrefab: {fileID: 100100000, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+--- !u!4 &4768806124854089332 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4789241475065248, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+  m_PrefabInstance: {fileID: 4773587102795297748}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4769464604282775898 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
@@ -2626,10 +2663,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackStyle: 0
   attackRange: 3
-  attackDuration: 0.1
+  attackDuration: 0.6
   animatorAttackTrigger: Attack
-  projectilePrefab: {fileID: 0}
-  projectileSpawnPoint: {fileID: 0}
+  projectilePrefab: {fileID: 2877784644291625097, guid: f73a39cb3ef6d414d8855edeeea2a4c4, type: 3}
+  projectileSpawnPoint: {fileID: 4768806124854089332}
 --- !u!195 &1406027970619840182
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -2681,9 +2718,20 @@ MonoBehaviour:
   meleeDashInterval: 2
   meleeDashSpeed: 15
   dashApproachDuration: 0.75
+  spitAttackComponent: {fileID: 7001693328372778477}
+  spitChance: 0.8
+  spitCooldown: 1
+  spitTelegraphDuration: 0.2
   rangedCirclingSpeed: 5
   desiredRangedDistance: 10
-  directionChangeInterval: 4
+  distanceDeadzone: 1.5
+  repositionTickRate: 0.7
+  rangedTacticChangeInterval: 4
+  kitingWeight: 1.5
+  strafeWeight: 1
+  playerPanicDistance: 3
+  wallAvoidDistance: 1.5
+  fleeSpeed: 6
   repositionSpeed: 4
   repositionDistance: 4
   repositionDuration: 1
@@ -3074,10 +3122,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackStyle: 0
   attackRange: 3
-  attackDuration: 0.1
+  attackDuration: 0.6
   animatorAttackTrigger: Attack
-  projectilePrefab: {fileID: 0}
-  projectileSpawnPoint: {fileID: 0}
+  projectilePrefab: {fileID: 2877784644291625097, guid: f73a39cb3ef6d414d8855edeeea2a4c4, type: 3}
+  projectileSpawnPoint: {fileID: 6004888394852789818}
 --- !u!195 &1202468739762464038
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -3129,9 +3177,20 @@ MonoBehaviour:
   meleeDashInterval: 2
   meleeDashSpeed: 15
   dashApproachDuration: 0.75
+  spitAttackComponent: {fileID: 331037720074326351}
+  spitChance: 0.8
+  spitCooldown: 1
+  spitTelegraphDuration: 0.2
   rangedCirclingSpeed: 5
   desiredRangedDistance: 10
-  directionChangeInterval: 4
+  distanceDeadzone: 1.5
+  repositionTickRate: 0.7
+  rangedTacticChangeInterval: 4
+  kitingWeight: 1.5
+  strafeWeight: 1
+  playerPanicDistance: 3
+  wallAvoidDistance: 1.5
+  fleeSpeed: 6
   repositionSpeed: 4
   repositionDistance: 4
   repositionDuration: 1
@@ -3198,6 +3257,11 @@ CapsuleCollider:
 --- !u!4 &6001925014245380372 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+  m_PrefabInstance: {fileID: 6000103002903251866}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &6004888394852789818 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4789241475065248, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
   m_PrefabInstance: {fileID: 6000103002903251866}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6596921513836580788
@@ -3532,10 +3596,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackStyle: 0
   attackRange: 3
-  attackDuration: 0.1
+  attackDuration: 0.6
   animatorAttackTrigger: Attack
-  projectilePrefab: {fileID: 0}
-  projectileSpawnPoint: {fileID: 0}
+  projectilePrefab: {fileID: 2877784644291625097, guid: f73a39cb3ef6d414d8855edeeea2a4c4, type: 3}
+  projectileSpawnPoint: {fileID: 6601708469303241236}
 --- !u!195 &8376432710769307953
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -3587,9 +3651,20 @@ MonoBehaviour:
   meleeDashInterval: 2
   meleeDashSpeed: 15
   dashApproachDuration: 0.75
+  spitAttackComponent: {fileID: 8322477891185411542}
+  spitChance: 0.8
+  spitCooldown: 1
+  spitTelegraphDuration: 0.2
   rangedCirclingSpeed: 5
   desiredRangedDistance: 10
-  directionChangeInterval: 4
+  distanceDeadzone: 1.5
+  repositionTickRate: 0.7
+  rangedTacticChangeInterval: 4
+  kitingWeight: 1.5
+  strafeWeight: 1
+  playerPanicDistance: 3
+  wallAvoidDistance: 1.5
+  fleeSpeed: 6
   repositionSpeed: 4
   repositionDistance: 4
   repositionDuration: 1
@@ -3653,3 +3728,8 @@ CapsuleCollider:
   m_Height: 0.43611634
   m_Direction: 1
   m_Center: {x: 0.0009598583, y: 0.20038676, z: -0.018073231}
+--- !u!4 &6601708469303241236 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4789241475065248, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+  m_PrefabInstance: {fileID: 6596921513836580788}
+  m_PrefabAsset: {fileID: 0}

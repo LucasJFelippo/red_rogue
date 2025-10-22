@@ -72,5 +72,20 @@ public class EnemyAttack : MonoBehaviour
             alvo.y = transform.position.y;
             projectile.transform.LookAt(alvo);
         }
+        if (attackStyle == AttackStyle.Melee)
+        {
+            if (projectilePrefab == null || projectileSpawnPoint == null)
+            {
+                Debug.LogError("Spit attack failed: Projectile Prefab or Spawn Point is not set.", this);
+                return;
+            }
+
+            GameObject projectile = Instantiate(projectilePrefab, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
+
+            Vector3 alvo = target.position;
+            alvo.y = transform.position.y;
+            projectile.transform.LookAt(alvo);
+        }
+
     }
 }
