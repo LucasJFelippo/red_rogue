@@ -42,12 +42,11 @@ public class EnemyNavMeshAI : MonoBehaviour
     public float desiredRangedDistance = 10f;
     public float distanceDeadzone = 1.5f;
     public float repositionTickRate = 0.7f;
+    public float rangedTacticChangeInterval = 4.0f;
     [Space]
     [Tooltip("Prioridade para manter distância vs. circular")]
     public float kitingWeight = 1.5f;
     public float strafeWeight = 1.0f;
-    [Tooltip("Chance (0 a 1) de trocar de direção a cada 'tick'")]
-    public float directionChangeChance = 0.05f;
     [Space]
     [Tooltip("Se o player estiver MAIS PERTO que isso, a IA entra em pânico e só tenta fugir.")]
     public float playerPanicDistance = 3.0f;
@@ -90,7 +89,10 @@ public class EnemyNavMeshAI : MonoBehaviour
     private bool isDashing = false;
     private float timeStuck = 0f;
     private float timeUntilMeleeDirectionChange = 0f;
-    private float timeUntilRangedMoveTick = 0f;
+    private float timeUntilRangedMoveTick = 0f; 
+    private float timeUntilTacticChange = 0f;
+    private float currentKiteWeight;
+    private float currentStrafeWeight;
 
 
     void Awake()
@@ -170,7 +172,7 @@ public class EnemyNavMeshAI : MonoBehaviour
                 animator.SetInteger("AIState", 1);
                 navMeshAgent.isStopped = false;
                 navMeshAgent.speed = pursuitSpeed;
-                navMeshAgent.stoppingDistance = engagementDistance;
+                navMeshAgent.stoppingDistance = 2f;
                 break;
             case AIState.Lurking:
                 animator.SetInteger("AIState", 2);
@@ -186,8 +188,8 @@ public class EnemyNavMeshAI : MonoBehaviour
                 {
                     navMeshAgent.speed = rangedCirclingSpeed;
                     navMeshAgent.stoppingDistance = 0;
-                    circlingDirection = (Random.value > 0.5f) ? 1 : -1;
                     timeUntilRangedMoveTick = 0f;
+                    timeUntilTacticChange = 0f;
                 }
                 break;
             case AIState.Attacking:
@@ -556,29 +558,50 @@ public class EnemyNavMeshAI : MonoBehaviour
     {
         if (playerTarget == null) return;
 
-        // --- 1. VERIFICAÇÃO DE PÂNICO (GATILHO PARA O NOVO ESTADO) ---
+        // --- 1. LÓGICA DE MUDANÇA DE TÁTICA (A CADA X SEGUNDOS) ---
+        timeUntilTacticChange -= Time.deltaTime;
+        if (timeUntilTacticChange <= 0f)
+        {
+            // Reseta o timer da tática com aleatoriedade
+            timeUntilTacticChange = Random.Range(rangedTacticChangeInterval * 0.8f, rangedTacticChangeInterval * 1.2f);
+
+            // 50/50 chance de focar em Kiting ou Strafing
+            if (Random.value > 0.5f)
+            {
+                // MODO: Focar em Kiting (andar para trás)
+                // (Usa os pesos totais do inspector)
+                currentKiteWeight = kitingWeight;
+                currentStrafeWeight = strafeWeight * 0.2f; // Reduz o strafe
+            }
+            else
+            {
+                // MODO: Focar em Strafing (circular)
+                // (Usa os pesos totais do inspector)
+                currentKiteWeight = kitingWeight * 0.2f; // Reduz o kiting
+                currentStrafeWeight = strafeWeight;
+
+                // Randomiza a direção do círculo (como você pediu)
+                circlingDirection = (Random.value > 0.5f) ? 1 : -1;
+            }
+        }
+
+        // --- 2. LÓGICA DE STUCK/PANIC (Das respostas anteriores) ---
+        // (Verifica se o player está muito perto E se há uma parede)
         float distanceToPlayer = Vector3.Distance(transform.position, playerTarget.position);
-
-        // Perto do player (J)?
         bool isPanicked = (distanceToPlayer <= playerPanicDistance);
-
-        // Perto da parede (N)? Checa a direção de fuga (para trás)
         Vector3 kitingDirection = (transform.position - playerTarget.position).normalized;
-        if (kitingDirection == Vector3.zero) kitingDirection = -transform.forward; // Segurança
-
+        if (kitingDirection == Vector3.zero) kitingDirection = -transform.forward;
         Vector3 rayOrigin = transform.position + Vector3.up * 1.0f;
         bool isAgainstWall = Physics.Raycast(rayOrigin, kitingDirection, wallAvoidDistance, obstacleMask);
 
         if (isPanicked && isAgainstWall)
         {
-            // CONDIÇÃO DE PÂNICO "STUCK" ATINGIDA!
             SetState(AIState.Fleeing);
-            return; // Saia da lógica de Lurking
+            return;
         }
 
-        // --- 2. LÓGICA DE LURKING NORMAL (se não estiver em pânico) ---
-        // (Esta é a lógica de kiting/strafing/stuck-detect que já tínhamos)
-
+        // --- 3. LÓGICA DO "TICK" DE MOVIMENTO (A CADA ~0.3 SEGUNDOS) ---
+        // (Verifica se está preso no movimento atual)
         if (navMeshAgent.hasPath && navMeshAgent.velocity.sqrMagnitude < 0.1f * 0.1f)
         {
             timeStuck += Time.deltaTime;
@@ -590,23 +613,20 @@ public class EnemyNavMeshAI : MonoBehaviour
         bool isStuck = timeStuck > 0.5f;
 
         timeUntilRangedMoveTick -= Time.deltaTime;
-
         if (timeUntilRangedMoveTick <= 0f || isStuck)
         {
             timeUntilRangedMoveTick = Random.Range(repositionTickRate * 0.8f, repositionTickRate * 1.2f);
-
             if (isStuck)
             {
                 timeStuck = 0f;
-                circlingDirection *= -1;
+                circlingDirection *= -1; // Desemperrar
             }
-            else if (Random.value < directionChangeChance)
-            {
-                circlingDirection *= -1;
-            }
+            // (Removemos o 'directionChangeChance' daqui, pois a Tática agora cuida disso)
 
-            // Cálculos de Vetor (Kiting)
+            // --- 4. CÁLCULOS DE VETOR (Com os pesos da tática atual) ---
             Vector3 directionToPlayerNormalized = (playerTarget.position - transform.position).normalized;
+
+            // Vetor de Kiting
             Vector3 kitingVector = Vector3.zero;
             float distanceError = distanceToPlayer - desiredRangedDistance;
             if (Mathf.Abs(distanceError) > distanceDeadzone)
@@ -617,17 +637,18 @@ public class EnemyNavMeshAI : MonoBehaviour
             // Vetor de Strafe
             Vector3 strafeVector = Vector3.Cross(directionToPlayerNormalized, transform.up).normalized * circlingDirection;
 
+            // Wall Check (Proativo para Strafe)
             if (Physics.Raycast(rayOrigin, strafeVector, 2.0f, obstacleMask))
             {
                 strafeVector = Vector3.zero;
                 circlingDirection *= -1;
-                timeUntilRangedMoveTick = 0f;
+                timeUntilTacticChange = 0f; // Força uma nova tática
             }
 
-            // Combina Vetores
-            Vector3 combinedDirection = (kitingVector * kitingWeight + strafeVector * strafeWeight).normalized;
+            // --- 5. COMBINA VETORES (USANDO OS PESOS ATUAIS) ---
+            Vector3 combinedDirection = (kitingVector * currentKiteWeight + strafeVector * currentStrafeWeight).normalized;
 
-            // Define Destino
+            // --- 6. DEFINE O DESTINO ---
             if (combinedDirection.sqrMagnitude > 0.1f)
             {
                 float lookAheadDistance = 4f;
@@ -648,7 +669,7 @@ public class EnemyNavMeshAI : MonoBehaviour
             }
             else
             {
-                navMeshAgent.ResetPath();
+                navMeshAgent.ResetPath(); // Pare se não houver direção
             }
         }
     }
