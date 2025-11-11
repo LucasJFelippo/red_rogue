@@ -4178,79 +4178,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.7705286, y: 5, z: 2.698244}
   m_Center: {x: 0.3852643, y: 2.6, z: 1.349122}
---- !u!1001 &244333621
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 3.89
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.67362404
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 3.44
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1034305465569245333, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_Name
-      value: Pers
-      objectReference: {fileID: 0}
-    - target: {fileID: 1034305465569245333, guid: ec25783717552c942807fc06937a55b4, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: ec25783717552c942807fc06937a55b4, type: 3}
 --- !u!1 &256011731
 GameObject:
   m_ObjectHideFlags: 0
@@ -5996,7 +5923,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fe73fd97e590fe46a1c93ab88b64698, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 465194201}
+  target: {fileID: 0}
   offset: {x: -15, y: 13, z: -15}
   smoothSpeed: 5
   startSize: 10
@@ -9969,11 +9896,6 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
---- !u!4 &465194201 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 365152191692907055, guid: ec25783717552c942807fc06937a55b4, type: 3}
-  m_PrefabInstance: {fileID: 244333621}
-  m_PrefabAsset: {fileID: 0}
 --- !u!43 &480140827
 Mesh:
   m_ObjectHideFlags: 0
@@ -25781,9 +25703,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fc2ca9d92e8d7b4ea18d4f7f2b6327a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  arenaWidth: 20
+  arenaWidth: 60
   arenaHeight: 0
-  arenaDepth: 20
+  arenaDepth: 60
   minTilePerimeter: 4
   minTileWidth: 1.2
   minTileDepth: 0.8
@@ -46049,5 +45971,4 @@ SceneRoots:
   - {fileID: 1307416679}
   - {fileID: 1156873069}
   - {fileID: 198159545}
-  - {fileID: 244333621}
   - {fileID: 1202348489}

@@ -193,6 +193,7 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
     {
         var gameObj = new GameObject($"Outer_Wall_{parent.childCount:D3}");
         gameObj.transform.SetParent(parent, false);
+        gameObj.layer = LayerMask.NameToLayer("Walls");
 
         gameObj.transform.localPosition = new Vector3(tileDim.x, arenaHeight, tileDim.y);
 
