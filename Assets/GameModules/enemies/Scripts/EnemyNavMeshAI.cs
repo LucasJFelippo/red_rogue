@@ -80,6 +80,8 @@ public class EnemyNavMeshAI : MonoBehaviour
     public string animatorVelocityXParameter = "VelocityX";
     public string animatorVelocityZParameter = "VelocityZ";
 
+    [Header("Animation Tuning")]
+    public float animationBaseSpeed = 3.0f;
     private NavMeshAgent navMeshAgent;
     private Animator animator;
     private Transform playerTarget;
@@ -105,6 +107,7 @@ public class EnemyNavMeshAI : MonoBehaviour
     private bool isPerformingSpit = false;
     private EnemyStats stats;
     private int animatorHealthHash;
+    private int animatorSpeedMultiplierHash;
 
 
     void Awake()
@@ -123,6 +126,7 @@ public class EnemyNavMeshAI : MonoBehaviour
         animatorVelocityZHash = Animator.StringToHash(animatorVelocityZParameter);
         animatorIsDashingHash = Animator.StringToHash("IsDashing");
         animatorHealthHash = Animator.StringToHash("HealthPercent");
+        animatorSpeedMultiplierHash = Animator.StringToHash("animationSpeedMultiplier");
         currentPatrolIndex = 0;
     }
 
@@ -723,13 +727,31 @@ public class EnemyNavMeshAI : MonoBehaviour
     }
     private void UpdateAnimator()
     {
-        float speed = (currentState == AIState.Attacking || currentState == AIState.Idle) ? 0f : navMeshAgent.velocity.magnitude;
         Vector3 localVelocity = transform.InverseTransformDirection(navMeshAgent.velocity);
-        float velocityX = localVelocity.x;
-        float velocityZ = localVelocity.z;
-        animator.SetFloat(animatorSpeedParamHash, speed);
+        float maxAgentSpeed = navMeshAgent.speed;
+
+        float velocityX = 0;
+        float velocityZ = 0;
+
+        if (maxAgentSpeed > 0.1f)
+        {
+            velocityX = Mathf.Clamp(localVelocity.x / maxAgentSpeed, -1f, 1f);
+            velocityZ = Mathf.Clamp(localVelocity.z / maxAgentSpeed, -1f, 1f);
+        }
+
+        float currentSpeed = navMeshAgent.velocity.magnitude;
+        float speedMultiplier = 1.0f;
+
+        if (animationBaseSpeed > 0.1f)
+        {
+            speedMultiplier = currentSpeed / animationBaseSpeed;
+        }
+
+        animator.SetFloat(animatorSpeedParamHash, currentSpeed);
         animator.SetFloat(animatorVelocityXHash, velocityX);
         animator.SetFloat(animatorVelocityZHash, velocityZ);
+        animator.SetFloat(animatorSpeedMultiplierHash, speedMultiplier);
+
         if (stats != null)
         {
             float healthPercent = stats.CurrentHealth / stats.maxHealth;
