@@ -282,7 +282,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3501354168370149901}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 0}
   m_CullingMode: 0
@@ -343,13 +343,20 @@ MonoBehaviour:
   meleeDashInterval: 2
   meleeDashSpeed: 15
   dashApproachDuration: 0.75
+  spitAttackComponent: {fileID: 0}
+  spitChance: 0.6
+  spitCooldown: 5
+  spitTelegraphDuration: 0.6
   rangedCirclingSpeed: 7
   desiredRangedDistance: 12
   distanceDeadzone: 1.5
   repositionTickRate: 0.5
+  rangedTacticChangeInterval: 4
   kitingWeight: 1.5
   strafeWeight: 1
-  directionChangeChance: 0.05
+  playerPanicDistance: 5
+  wallAvoidDistance: 8
+  fleeSpeed: 8
   repositionSpeed: 4
   repositionDistance: 10
   repositionDuration: 1
