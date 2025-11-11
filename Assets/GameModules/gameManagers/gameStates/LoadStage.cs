@@ -50,5 +50,11 @@ public class LoadStage : AbstractState
         CameraController cameraControl = GameObject.FindWithTag("MainCamera").GetComponent<CameraController>();
         cameraControl.target = player.transform;
 
+        player.SetActive(false);
+
+        // Animation Phase
+
+        yield return arenaObj.FloorRisingAnimation();
+
     }
 }

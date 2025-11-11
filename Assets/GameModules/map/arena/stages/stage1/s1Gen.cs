@@ -112,7 +112,7 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
 
         if (Application.isPlaying)
         {
-            foreach (var tile in _arenaTiles.floorTiles) { tile.GetComponent<MeshRenderer>().enabled = true; }
+            // foreach (var tile in _arenaTiles.floorTiles) { tile.GetComponent<MeshRenderer>().enabled = true; }
         }
         else
         {
@@ -445,6 +445,31 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
             SplitHalf(lowerRect, tile_array);
         }
     }
+    #endregion
+
+
+    #region Animation
+
+    public IEnumerator FloorRisingAnimation(float delay = 0.005f, float riseDistance = 10f, float duration = 0.3f)
+    {
+        List<GameObject> tiless = _arenaTiles.floorTiles;
+        Debug.Log(tiless[1]);
+        foreach (GameObject tile in tiless)
+        {
+            tile.GetComponent<MeshRenderer>().enabled = true;
+
+            Vector3 startPos = tile.transform.localPosition;
+            Vector3 below = startPos - new Vector3(0f, riseDistance, 0f);
+
+            tile.transform.localPosition = below;
+
+            LeanTween.moveLocal(tile, startPos, duration).setEaseOutBack();
+
+            yield return new WaitForSeconds(delay);
+        }
+        yield return new WaitForSeconds(duration);
+    }
+
     #endregion
 
 

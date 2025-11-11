@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour, IGameManInterface
     public GameObject getPlayerPrefab => playerPrefab;
 
     [Header("Enemies")]
+    [SerializeField]
     private List<EnemyStats> spawnedEnemies = new List<EnemyStats>();
 
     private int gamePhase = 1;
