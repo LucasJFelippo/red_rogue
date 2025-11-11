@@ -1,2 +1,16 @@
 fileFormatVersion: 2
 guid: 3fc2ca9d92e8d7b4ea18d4f7f2b6327a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - topAtlas: {instanceID: 0}
+  - sideAtlas: {instanceID: 0}
+  - topMaterial: {instanceID: 0}
+  - sideMaterial: {instanceID: 0}
+  - enemySpawner: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
