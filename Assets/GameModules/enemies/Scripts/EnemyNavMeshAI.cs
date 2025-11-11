@@ -103,6 +103,8 @@ public class EnemyNavMeshAI : MonoBehaviour
     private float currentKiteWeight;
     private float currentStrafeWeight;
     private bool isPerformingSpit = false;
+    private EnemyStats stats;
+    private int animatorHealthHash;
 
 
     void Awake()
@@ -110,6 +112,7 @@ public class EnemyNavMeshAI : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         enemyAttack = GetComponent<EnemyAttack>();
+        stats = GetComponent<EnemyStats>();
     }
 
     void Start()
@@ -119,6 +122,7 @@ public class EnemyNavMeshAI : MonoBehaviour
         animatorVelocityXHash = Animator.StringToHash(animatorVelocityXParameter);
         animatorVelocityZHash = Animator.StringToHash(animatorVelocityZParameter);
         animatorIsDashingHash = Animator.StringToHash("IsDashing");
+        animatorHealthHash = Animator.StringToHash("HealthPercent");
         currentPatrolIndex = 0;
     }
 
@@ -726,6 +730,11 @@ public class EnemyNavMeshAI : MonoBehaviour
         animator.SetFloat(animatorSpeedParamHash, speed);
         animator.SetFloat(animatorVelocityXHash, velocityX);
         animator.SetFloat(animatorVelocityZHash, velocityZ);
+        if (stats != null)
+        {
+            float healthPercent = stats.CurrentHealth / stats.maxHealth;
+            animator.SetFloat(animatorHealthHash, healthPercent);
+        }
     }
     private bool CanSeePlayer(float distanceToPlayer)
     {
