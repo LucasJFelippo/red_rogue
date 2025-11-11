@@ -25703,9 +25703,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fc2ca9d92e8d7b4ea18d4f7f2b6327a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   arenaWidth: 60
   arenaHeight: 0
   arenaDepth: 60
+=======
+  arenaWidth: 50
+  arenaHeight: 0
+  arenaDepth: 50
+>>>>>>> Stashed changes
+=======
+  arenaWidth: 50
+  arenaHeight: 0
+  arenaDepth: 50
+>>>>>>> Stashed changes
   minTilePerimeter: 4
   minTileWidth: 1.2
   minTileDepth: 0.8

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -29,9 +30,9 @@ public class PlayerAttack : MonoBehaviour
 
     // --- Variáveis Internas ---
     private int comboCounter = 0;
-    private bool comboInputReceived = false; 
+    private bool comboInputReceived = false;
     private Coroutine attackDashCoroutine;
-    private Coroutine comboWindowCoroutine; 
+    private Coroutine comboWindowCoroutine;
     private List<Collider> enemiesHitThisAttack;
     private bool isHitboxActive = false;
 
@@ -94,15 +95,13 @@ public class PlayerAttack : MonoBehaviour
     private IEnumerator ComboWindowCoroutine()
     {
         Debug.Log("Janela de combo ABERTA por " + comboBufferDuration + "s.");
-        // Espera o tempo definido
         yield return new WaitForSeconds(comboBufferDuration);
 
-        // Após o tempo, fecha a janela
         Debug.Log("Janela de combo FECHADA.");
         comboWindowCoroutine = null;
     }
 
-    // --- FUNÇÃO DE EVENTO DE ANIMAÇÃO (Chamada no FIM da animação) ---
+    // --- FUNÇÃO DE EVENTO DE ANIMAÇÃO
     public void FinishAttackAnimation()
     {
         // Se a janela de 1s ainda estava aberta, nós a fechamos
@@ -115,13 +114,19 @@ public class PlayerAttack : MonoBehaviour
         // Verifica se o clique foi registrado DENTRO daquela janela
         if (comboInputReceived)
         {
-            // Se sim, continua para o próximo ataque
+            if (comboCounter == 4)
+            {
+                Debug.Log("FIM combo!");
+                comboCounter = 0;
+                animator.SetInteger("ComboStep", 0);
+                isAttacking = false;
+                return;
+            }
             Debug.Log("Animação terminou, indo para o próximo combo!");
             PerformAttack(comboCounter + 1);
         }
         else
         {
-            // Se não, encerra o combo
             Debug.Log("Animação terminou, resetando o combo.");
             isAttacking = false;
             comboCounter = 0;

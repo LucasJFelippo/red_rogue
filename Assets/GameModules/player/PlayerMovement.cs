@@ -13,12 +13,12 @@ public class PlayerMovement : MonoBehaviour
     public float dashDistance = 7f;
     public float dashDuration = 0.2f;
 
-    [Header("Configurações da Esquiva (Para Trás)")] // <-- VOLTARAM
+    [Header("Configurações da Esquiva (Para Trás)")]
     public float dodgeDistance = 4f;
     public float dodgeDuration = 0.25f;
 
     [Header("Cooldown")]
-    public float actionCooldown = 0.5f; // Cooldown único para ambas as ações
+    public float actionCooldown = 0.5f;
 
     // --- Componentes e Variáveis Internas ---
     private Rigidbody rb;

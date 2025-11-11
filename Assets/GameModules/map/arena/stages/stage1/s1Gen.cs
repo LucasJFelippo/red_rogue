@@ -15,9 +15,9 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
     public float arenaHeight = 0;
     public float arenaDepth = 20;
 
-    public float ArenaWidth  => arenaWidth;
+    public float ArenaWidth => arenaWidth;
     public float ArenaHeight => arenaHeight;
-    public float ArenaDepth  => arenaDepth;
+    public float ArenaDepth => arenaDepth;
 
     private float floorColliderHeight = 0.2f;
 

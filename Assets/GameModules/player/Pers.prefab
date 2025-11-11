@@ -570,13 +570,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aababa5437e6a9542bb542c0889defb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  runSpeed: 7.68
+  runSpeed: 11
   rotationSpeed: 15
   wallLayer:
     serializedVersion: 2
     m_Bits: 1073741824
   dashDistance: 7
-  dashDuration: 0.5
+  dashDuration: 0.4
+  dodgeDistance: 4
+  dodgeDuration: 0.25
   actionCooldown: 1.5
 --- !u!114 &4234578489108800998
 MonoBehaviour:
@@ -723,9 +725,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackPoint: {fileID: 6010389174402576535}
-<<<<<<< HEAD
   attackRange: 21.9
-  attackDamage: 416
+  attackDamage: 15
   enemyLayers:
     serializedVersion: 2
     m_Bits: 64
@@ -734,17 +735,7 @@ MonoBehaviour:
     m_Bits: 1073741824
   attackDashDistance: 1.5
   attackDashDuration: 0.15
-  attackBufferWindow: 0.2
-=======
-  attackRange: 0.78
-  enemyLayers:
-    serializedVersion: 2
-    m_Bits: 64
-  attackDashDistance: 1.5
-  attackDashDuration: 0.15
-  attackDamage: 20
-  attackDashForce: 5
->>>>>>> origin/main
+  comboBufferDuration: 1
 --- !u!1001 &3929919021691347977
 PrefabInstance:
   m_ObjectHideFlags: 0
