@@ -201,7 +201,7 @@ public class EnemyNavMeshAI : MonoBehaviour
                 if (combatStyle == CombatStyle.Melee)
                 {
                     navMeshAgent.speed = meleeCirclingSpeed;
-                    navMeshAgent.stoppingDistance = 0;
+                    navMeshAgent.stoppingDistance = meleeCirclingDistance * 1.5f;
                     timeUntilMeleeDirectionChange = 0f;
                 }
                 else

@@ -85,18 +85,19 @@ public class EnemyStats : MonoBehaviour
         var agentComponent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         if (agentComponent != null)
         {
-            agentComponent.velocity = Vector3.zero;
-            agentComponent.updateRotation = false;
-            agentComponent.isStopped = true;
-            agentComponent.ResetPath();
+            if (agentComponent.enabled && agentComponent.isOnNavMesh)
+            {
+                agentComponent.velocity = Vector3.zero;
+                agentComponent.updateRotation = false;
+                agentComponent.isStopped = true;
+                agentComponent.ResetPath();
+            }
             agentComponent.enabled = false;
         }
 
         var rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
             rb.isKinematic = true;
         }
 

@@ -1778,7 +1778,7 @@ MonoBehaviour:
   spitAttackComponent: {fileID: 9033012396953741447}
   spitChance: 0.8
   spitCooldown: 1
-  spitTelegraphDuration: 1.5
+  spitTelegraphDuration: 1.4
   rangedCirclingSpeed: 4
   desiredRangedDistance: 10
   distanceDeadzone: 1.5
@@ -1826,7 +1826,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -2248,7 +2248,7 @@ MonoBehaviour:
   spitAttackComponent: {fileID: 1587538963049320495}
   spitChance: 0.8
   spitCooldown: 1
-  spitTelegraphDuration: 1.5
+  spitTelegraphDuration: 1.4
   rangedCirclingSpeed: 4
   desiredRangedDistance: 10
   distanceDeadzone: 1.5
@@ -2296,7 +2296,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -2723,7 +2723,7 @@ MonoBehaviour:
   spitAttackComponent: {fileID: 7001693328372778477}
   spitChance: 0.8
   spitCooldown: 1
-  spitTelegraphDuration: 1.5
+  spitTelegraphDuration: 1.4
   rangedCirclingSpeed: 5
   desiredRangedDistance: 10
   distanceDeadzone: 1.5
@@ -2771,7 +2771,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -3182,8 +3182,8 @@ MonoBehaviour:
   dashApproachDuration: 0.75
   spitAttackComponent: {fileID: 331037720074326351}
   spitChance: 0.8
-  spitCooldown: 1
-  spitTelegraphDuration: 1.5
+  spitCooldown: 3
+  spitTelegraphDuration: 1.4
   rangedCirclingSpeed: 4
   desiredRangedDistance: 10
   distanceDeadzone: 1.5
@@ -3231,7 +3231,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -3658,7 +3658,7 @@ MonoBehaviour:
   spitAttackComponent: {fileID: 8322477891185411542}
   spitChance: 0.8
   spitCooldown: 1
-  spitTelegraphDuration: 1.5
+  spitTelegraphDuration: 1.4
   rangedCirclingSpeed: 4
   desiredRangedDistance: 10
   distanceDeadzone: 1.5
@@ -3706,7 +3706,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
