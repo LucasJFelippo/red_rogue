@@ -14,6 +14,7 @@ public class LoadStage : AbstractState
 
     public override void StartState()
     {
+        Debug.Log("Entering Load Stage state");
         _gameManInter.StartCoroutine(LoadStageRoutine());
     }
 
@@ -46,6 +47,7 @@ public class LoadStage : AbstractState
 
         GameObject randomTile = floorTiles[Random.Range(0, floorTiles.Count)];
         GameObject player = Object.Instantiate(_gameManInter.getPlayerPrefab, randomTile.transform.position, randomTile.transform.rotation);
+        _gameManInter.player = player;
 
         CameraController cameraControl = GameObject.FindWithTag("MainCamera").GetComponent<CameraController>();
         cameraControl.target = player.transform;
@@ -62,10 +64,10 @@ public class LoadStage : AbstractState
 
         foreach (EnemyStats enemy in _gameManInter.getSpawnedEnemies) {
             enemy.gameObject.SetActive(true);
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.2f);
         }
 
-        playerMove.enabled = true;
+        _gameManInter.ChangeState(new PlayStage(_gameManInter));
 
     }
 }

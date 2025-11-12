@@ -7,39 +7,43 @@ public class PlayerMovement : MonoBehaviour
     [Header("Configurações de Movimento")]
     public float runSpeed = 7f;
     public float rotationSpeed = 15f;
+    public LayerMask wallLayer;
 
     [Header("Configurações do Dash (Para Frente)")]
     public float dashDistance = 7f;
     public float dashDuration = 0.2f;
-    public float actionCooldown = 1.5f;
 
     [Header("Configurações da Esquiva (Para Trás)")]
     public float dodgeDistance = 4f;
     public float dodgeDuration = 0.25f;
+
+    [Header("Cooldown")]
+    public float actionCooldown = 0.5f;
 
     // --- Componentes e Variáveis Internas ---
     private Rigidbody rb;
     private Animator animator;
     private CapsuleCollider capsule;
     private PlayerInputActions controls;
-    private PlayerAttack playerAttack; // Referência ao script de ataque
+    private PlayerAttack playerAttack;
 
     private Vector2 moveInput;
-    private bool actionInputPressed = false;
-    private bool isBusy = false; // Trava para dash/esquiva
+    public bool isDashing { get; private set; } = false;
     private float nextActionTime = 0f;
+    private Coroutine dashCoroutine;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         capsule = GetComponent<CapsuleCollider>();
-        playerAttack = GetComponent<PlayerAttack>(); // Pega a referência do script de ataque
+        playerAttack = GetComponent<PlayerAttack>();
 
         controls = new PlayerInputActions();
         controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
         controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
-        controls.Player.Dash.performed += ctx => actionInputPressed = true;
+
+        controls.Player.Dash.performed += ctx => TryDash();
     }
 
     void OnEnable() => controls.Enable();
@@ -47,31 +51,18 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Se estiver ocupado com um dash, esquiva OU um ataque, não faz mais nada.
-        if (isBusy || playerAttack.isAttacking) return;
+        if (isDashing) return;
+
+        if (playerAttack.isAttacking)
+        {
+            rb.linearVelocity = Vector3.zero;
+            animator.SetBool("isMoving", false);
+            return;
+        }
 
         bool isMoving = moveInput.magnitude > 0.1f;
+        animator.SetBool("isMoving", isMoving);
 
-        // --- LÓGICA DE DASH E ESQUIVA CONTEXTUAL ---
-        bool shiftPressed = Keyboard.current.leftShiftKey.isPressed;
-
-        if ((actionInputPressed || (shiftPressed && isMoving)) && Time.time >= nextActionTime)
-        {
-            nextActionTime = Time.time + actionCooldown;
-
-            if (isMoving)
-            {
-                StartCoroutine(ActionCoroutine(dashDistance, dashDuration, transform.forward, "Dash"));
-            }
-            else
-            {
-                StartCoroutine(ActionCoroutine(dodgeDistance, dodgeDuration, -transform.forward, "Dodge"));
-            }
-        }
-        actionInputPressed = false;
-
-
-        // --- LÓGICA DE MOVIMENTO E ROTAÇÃO ---
         if (isMoving)
         {
             Vector3 camForward = Camera.main.transform.forward;
@@ -81,7 +72,9 @@ public class PlayerMovement : MonoBehaviour
 
             Vector3 moveDirection = (camForward * moveInput.y + camRight * moveInput.x).normalized;
 
-            rb.MovePosition(rb.position + moveDirection * runSpeed * Time.fixedDeltaTime);
+            Vector3 targetVelocity = moveDirection * runSpeed;
+            targetVelocity.y = rb.linearVelocity.y;
+            rb.linearVelocity = targetVelocity;
 
             if (moveDirection != Vector3.zero)
             {
@@ -91,40 +84,88 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            rb.linearVelocity = Vector3.zero;
+            rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
         }
-
-        // --- ATUALIZAÇÃO DO ANIMATOR ---
-        animator.SetBool("isMoving", isMoving);
     }
 
-    private IEnumerator ActionCoroutine(float distance, float duration, Vector3 direction, string triggerName)
+    // --- FUNÇÃO Dash ---
+    private void TryDash()
     {
-        isBusy = true;
-        animator.SetTrigger(triggerName);
+        if (Time.time < nextActionTime) return;
 
-        Vector3 startPosition = rb.position;
-        Vector3 actionDirection = direction.normalized;
-
-        float actualDistance = distance;
-        Vector3 p1 = transform.position + capsule.center + Vector3.up * -capsule.height * 0.5f;
-        Vector3 p2 = p1 + Vector3.up * capsule.height;
-        if (Physics.CapsuleCast(p1, p2, capsule.radius, actionDirection, out RaycastHit hit, distance))
+        if (dashCoroutine != null)
         {
-            actualDistance = hit.distance;
+            StopCoroutine(dashCoroutine);
         }
 
-        Vector3 endPosition = startPosition + actionDirection * actualDistance;
+        if (playerAttack.isAttacking)
+        {
+            playerAttack.CancelAttack();
+        }
+
+        nextActionTime = Time.time + actionCooldown;
+
+        bool isMoving = moveInput.magnitude > 0.1f;
+
+        // --- LÓGICA DE DASH/DODGE RESTAURADA ---
+        if (isMoving)
+        {
+            // DASH
+
+            Vector3 camForward = Camera.main.transform.forward;
+            Vector3 camRight = Camera.main.transform.right;
+            camForward.y = 0; camRight.y = 0;
+            camForward.Normalize(); camRight.Normalize();
+            Vector3 dashDirection = (camForward * moveInput.y + camRight * moveInput.x).normalized;
+
+            dashCoroutine = StartCoroutine(DashCoroutine(dashDistance, dashDuration, dashDirection, "Dash"));
+        }
+        else
+        {
+            // DODGE
+            Vector3 dashDirection = -transform.forward;
+
+            dashCoroutine = StartCoroutine(DashCoroutine(dodgeDistance, dodgeDuration, dashDirection, "Dodge"));
+        }
+    }
+
+    // Corrotina de Dash
+    private IEnumerator DashCoroutine(float distance, float duration, Vector3 direction, string triggerName)
+    {
+        isDashing = true;
+        animator.SetTrigger(triggerName);
+
+        rb.isKinematic = true;
+
         float elapsedTime = 0f;
+        float speed = distance / duration;
 
         while (elapsedTime < duration)
         {
-            rb.MovePosition(Vector3.Lerp(startPosition, endPosition, elapsedTime / duration));
+            Vector3 movementStep = direction * speed * Time.fixedDeltaTime;
+            Vector3 newPos = rb.position + movementStep;
+
+            if (Physics.CapsuleCast(
+                rb.position + capsule.center + Vector3.up * -capsule.height * 0.5f,
+                rb.position + capsule.center + Vector3.up * capsule.height * 0.5f,
+                capsule.radius,
+                direction,
+                out RaycastHit hit,
+                movementStep.magnitude,
+                wallLayer))
+            {
+                rb.MovePosition(hit.point - direction * capsule.radius);
+                break;
+            }
+
+            rb.MovePosition(newPos);
+
             elapsedTime += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
         }
 
-        rb.MovePosition(endPosition);
-        isBusy = false;
+        rb.isKinematic = false;
+        isDashing = false;
+        dashCoroutine = null;
     }
 }

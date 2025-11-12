@@ -10,21 +10,28 @@ public class GameManager : MonoBehaviour, IGameManInterface
 
     [Header("Game Manager")]
     private static GameManager _instance = null;
-    public static IGameManInterface instance { get { return _instance; } }
 
     private AbstractState _current_state;
 
     [Header("Player")]
+    public GameObject player { get; set; }
     public GameObject playerPrefab;
 
     [Header("Enemies")]
     [SerializeField]
     public List<EnemyStats> spawnedEnemies = new List<EnemyStats>();
 
-    private int gamePhase = 1;
-    private int gameStage = 1;
+    public int gamePhase { get; set; } = 1;
+    public int gameStage { get; set; } = 1;
+
+    [Header("Modules")]
+    // TODO: Not implemented yet
+    IArenaGenInterface arenaObj { get; set; }
+    IArenaGenInterface spawnerObj { get; set; }
     
-    [Header("Getters")]
+    [Header("Getters/Setters")]
+    public static IGameManInterface instance { get { return _instance; } }
+
     public GameObject getPlayerPrefab => playerPrefab;
     public List<EnemyStats> getSpawnedEnemies => spawnedEnemies;
 

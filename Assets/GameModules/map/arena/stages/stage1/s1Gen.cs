@@ -468,6 +468,14 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
         yield return new WaitForSeconds(duration);
     }
 
+    // public IEnumerator StageCompletedAnimation()
+    // {
+    //     List<GameObject> wallList = _arenaTiles.outerRightWallTiles.AddRange(_arenaTiles.outerLeftWallTiles);
+    //     GameObject wall = wallList[Random.Range(0, wallList.Count)];
+    //     wallRenderer = wall.GetComponent<MeshRenderer>();
+    //     wallRenderer.enabled = false;
+    // }
+
     #endregion
 
 

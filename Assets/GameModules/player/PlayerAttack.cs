@@ -1,43 +1,48 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class PlayerAttack : MonoBehaviour
 {
-    // --- Variáveis Antigas ---
-    public bool isAttacking { get; private set; }
     [Header("Configurações do Ataque")]
     public Transform attackPoint;
     public float attackRange = 0.5f;
-    public LayerMask enemyLayers;
-
-    // --- Variáveis para o Avanço Controlado ---
-    [Header("Avanço do Ataque")]
-    public float attackDashDistance = 1.5f; // A distância que o player avança
-    public float attackDashDuration = 0.15f; // O tempo que leva para avançar
-
-    // --- Variáveis para Combo e Avanço ---
-    [Header("Sistema de Combo")]
     public int attackDamage = 20;
-    public float attackDashForce = 5f; // Força do "pulinho" pra frente ao atacar
-    private int comboCounter = 0; // Controla qual ataque estamos no combo (0, 1, 2...)
-    private bool canReceiveComboInput = false; // Janela de tempo para registrar o próximo clique
-    private bool comboInputReceived = false; // Registra se o jogador clicou para o próximo combo
+    public LayerMask enemyLayers;
+    public LayerMask wallLayer;
+
+    [Header("Avanço do Ataque")]
+    public float attackDashDistance = 1.5f;
+    public float attackDashDuration = 0.15f;
+
+    [Header("Sistema de Combo (Sua Lógica)")]
+    public float comboBufferDuration = 1.0f;
+
+    public bool isAttacking { get; private set; }
 
     // --- Componentes ---
     private Animator animator;
-    private Rigidbody rb; // Precisamos do Rigidbody para o avanço
+    private Rigidbody rb;
+    private CapsuleCollider capsule;
     private PlayerInputActions controls;
-    private bool isHitboxActive = false;
+
+    // --- Variáveis Internas ---
+    private int comboCounter = 0;
+    private bool comboInputReceived = false;
+    private Coroutine attackDashCoroutine;
+    private Coroutine comboWindowCoroutine;
     private List<Collider> enemiesHitThisAttack;
+    private bool isHitboxActive = false;
 
     void Awake()
     {
         animator = GetComponent<Animator>();
-        rb = GetComponent<Rigidbody>(); // Pegamos a referência do Rigidbody
+        rb = GetComponent<Rigidbody>();
+        capsule = GetComponent<CapsuleCollider>();
         controls = new PlayerInputActions();
-        controls.Player.Attack.performed += ctx => Attack();
+        controls.Player.Attack.performed += ctx => TryAttack();
         enemiesHitThisAttack = new List<Collider>();
     }
 
@@ -46,28 +51,132 @@ public class PlayerAttack : MonoBehaviour
 
     void Update()
     {
+        // Não precisamos mais do timer no Update
         if (isHitboxActive) { PerformHitCheck(); }
     }
 
-    private void Attack()
+    private void TryAttack()
     {
-        // Se a janela de combo estiver aberta, registra o input para o próximo ataque
-        if (canReceiveComboInput)
+        PlayerMovement pm = GetComponent<PlayerMovement>();
+
+        if (!isAttacking && (pm == null || !pm.isDashing))
         {
-            comboInputReceived = true;
-            return;
+            PerformAttack(1);
+        }
+        else if (isAttacking)
+        {
+            if (comboWindowCoroutine != null)
+            {
+                Debug.Log("Input de combo registrado!");
+                comboInputReceived = true;
+            }
+        }
+    }
+
+    private void PerformAttack(int step)
+    {
+        isAttacking = true;
+        comboInputReceived = false; // Limpa o registro para este novo golpe
+        comboCounter = step;
+
+        animator.SetInteger("ComboStep", comboCounter);
+        animator.SetTrigger("Attack");
+
+        // Inicia o dash de ataque
+        if (attackDashCoroutine != null) StopCoroutine(attackDashCoroutine);
+        attackDashCoroutine = StartCoroutine(AttackDashCoroutine(attackDashDistance, attackDashDuration));
+
+        // Inicia a janela de buffer de 1 segundo
+        if (comboWindowCoroutine != null) StopCoroutine(comboWindowCoroutine);
+        comboWindowCoroutine = StartCoroutine(ComboWindowCoroutine());
+    }
+
+    // A corrotina que define o seu timer de 1 segundo
+    private IEnumerator ComboWindowCoroutine()
+    {
+        Debug.Log("Janela de combo ABERTA por " + comboBufferDuration + "s.");
+        yield return new WaitForSeconds(comboBufferDuration);
+
+        Debug.Log("Janela de combo FECHADA.");
+        comboWindowCoroutine = null;
+    }
+
+    // --- FUNÇÃO DE EVENTO DE ANIMAÇÃO
+    public void FinishAttackAnimation()
+    {
+        // Se a janela de 1s ainda estava aberta, nós a fechamos
+        if (comboWindowCoroutine != null)
+        {
+            StopCoroutine(comboWindowCoroutine);
+            comboWindowCoroutine = null;
         }
 
-        if (isAttacking) return; // Se já estiver atacando, não faz nada
+        // Verifica se o clique foi registrado DENTRO daquela janela
+        if (comboInputReceived)
+        {
+            if (comboCounter == 4)
+            {
+                Debug.Log("FIM combo!");
+                comboCounter = 0;
+                animator.SetInteger("ComboStep", 0);
+                isAttacking = false;
+                return;
+            }
+            Debug.Log("Animação terminou, indo para o próximo combo!");
+            PerformAttack(comboCounter + 1);
+        }
+        else
+        {
+            Debug.Log("Animação terminou, resetando o combo.");
+            isAttacking = false;
+            comboCounter = 0;
+            animator.SetInteger("ComboStep", 0);
+        }
+    }
 
-        isAttacking = true; // ATIVA A TRAVA GERAL
-        comboCounter = 1; // Inicia o primeiro ataque do combo
-        animator.SetInteger("ComboStep", comboCounter);
+    // Função pública para o Dash poder cancelar o ataque
+    public void CancelAttack()
+    {
+        if (attackDashCoroutine != null) StopCoroutine(attackDashCoroutine);
+        if (comboWindowCoroutine != null) StopCoroutine(comboWindowCoroutine);
 
-        animator.SetTrigger("Attack1");
+        comboWindowCoroutine = null;
+        isAttacking = false;
+        comboInputReceived = false;
+        comboCounter = 0;
+        animator.SetInteger("ComboStep", 0);
+        animator.Play("Idle");
+        rb.useGravity = true;
+    }
 
-        // Aplica o dash de ataque
-        StartCoroutine(AttackDashCoroutine(attackDashDistance, attackDashDuration));
+    private IEnumerator AttackDashCoroutine(float distance, float duration)
+    {
+        rb.useGravity = false;
+        float elapsedTime = 0f;
+        float speed = distance / duration;
+        Vector3 direction = transform.forward;
+
+        while (elapsedTime < duration)
+        {
+            Vector3 movementStep = direction * speed * Time.fixedDeltaTime;
+            Vector3 newPos = rb.position + movementStep;
+            if (Physics.CapsuleCast(
+                rb.position + capsule.center + Vector3.up * -capsule.height * 0.5f,
+                rb.position + capsule.center + Vector3.up * capsule.height * 0.5f,
+                capsule.radius,
+                direction,
+                out RaycastHit hit,
+                movementStep.magnitude,
+                wallLayer))
+            {
+                rb.MovePosition(hit.point - direction * capsule.radius);
+                break;
+            }
+            rb.MovePosition(newPos);
+            elapsedTime += Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate();
+        }
+        rb.useGravity = true;
     }
 
     private void PerformHitCheck()
@@ -82,81 +191,33 @@ public class PlayerAttack : MonoBehaviour
                 {
                     enemyStats.TakeDamage(attackDamage);
                 }
+                Debug.Log("Acertou " + enemyCollider.name);
                 enemiesHitThisAttack.Add(enemyCollider);
             }
         }
     }
 
-    // --- CORROTINA PARA O AVANÇO DO ATAQUE ---
-    private IEnumerator AttackDashCoroutine(float distance, float duration)
+    public void StartAttackHitbox()
     {
-        Vector3 startPosition = rb.position;
-        Vector3 endPosition = startPosition + transform.forward * distance;
-        float elapsedTime = 0f;
-
-        while (elapsedTime < duration)
-        {
-            float progress = elapsedTime / duration;
-            rb.MovePosition(Vector3.Lerp(startPosition, endPosition, progress));
-            elapsedTime += Time.fixedDeltaTime;
-            yield return new WaitForFixedUpdate();
-        }
-
-        rb.MovePosition(endPosition);
-    }
-
-    // --- Funções chamadas por Animation Events ---
-
-    // Evento no INÍCIO da animação de ataque
-    public void AttackStart()
-    {
-        isAttacking = true;
+        isHitboxActive = true;
         enemiesHitThisAttack.Clear();
     }
 
-    // Evento para ABRIR a janela de input para o próximo combo
-    public void OpenComboWindow()
+    public void FinishAttackHitbox()
     {
-        canReceiveComboInput = true;
-        isAttacking = true;
+        isHitboxActive = false;
     }
 
-    // Evento para FECHAR a janela de input e decidir se continua o combo
-    public void CloseComboWindowAndCheckNext()
+    public void SetAnimationSpeed(float speed)
     {
-        canReceiveComboInput = false;
-
-        if (comboInputReceived) // Se o jogador apertou o botão de novo...
-        {
-            comboCounter++;
-            animator.SetInteger("ComboStep", comboCounter); // Prepara o próximo ataque
-            comboInputReceived = false;
-
-            // Aplica o dash de ataque
-            StartCoroutine(AttackDashCoroutine(attackDashDistance, attackDashDuration));
-        }
-        else // Se não, encerra o combo
-        {
-            FinishAttackAnimation();
-        }
+        if (animator != null) animator.speed = speed;
     }
 
-    // Evento chamado no FIM da última animação de ataque do combo
-    public void FinishAttackAnimation()
-    {
-        isAttacking = false;
-        comboCounter = 0;
-        animator.SetInteger("ComboStep", comboCounter); // Reseta o Animator
-    }
-
-    // Eventos para controlar a hitbox
-    public void StartAttackHitbox() { isHitboxActive = true; }
-    public void FinishAttackHitbox() { isHitboxActive = false; isAttacking = false; }
     void OnDrawGizmos()
     {
-        if (!isHitboxActive) return;
         if (attackPoint == null) return;
-        Gizmos.color = Color.red;
+        if (isHitboxActive) Gizmos.color = Color.red;
+        else Gizmos.color = new Color(1, 0, 0, 0.25f);
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 }
