@@ -85,9 +85,20 @@ public class EnemyStats : MonoBehaviour
         var agentComponent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         if (agentComponent != null)
         {
-            agentComponent.isStopped = true;
-            agentComponent.ResetPath();
+            if (agentComponent.enabled && agentComponent.isOnNavMesh)
+            {
+                agentComponent.velocity = Vector3.zero;
+                agentComponent.updateRotation = false;
+                agentComponent.isStopped = true;
+                agentComponent.ResetPath();
+            }
             agentComponent.enabled = false;
+        }
+
+        var rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;
         }
 
         var colliderComponent = GetComponent<Collider>();
@@ -99,9 +110,11 @@ public class EnemyStats : MonoBehaviour
         var animatorComponent = GetComponent<Animator>();
         if (animatorComponent != null)
         {
+            animatorComponent.applyRootMotion = false;
             animatorComponent.SetFloat("MovementSpeed", 0);
             animatorComponent.SetTrigger("Death");
         }
+
         Destroy(gameObject, 5f);
     }
 }

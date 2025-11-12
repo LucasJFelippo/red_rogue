@@ -80,6 +80,8 @@ public class EnemyNavMeshAI : MonoBehaviour
     public string animatorVelocityXParameter = "VelocityX";
     public string animatorVelocityZParameter = "VelocityZ";
 
+    [Header("Animation Tuning")]
+    public float animationBaseSpeed = 3.0f;
     private NavMeshAgent navMeshAgent;
     private Animator animator;
     private Transform playerTarget;
@@ -103,6 +105,9 @@ public class EnemyNavMeshAI : MonoBehaviour
     private float currentKiteWeight;
     private float currentStrafeWeight;
     private bool isPerformingSpit = false;
+    private EnemyStats stats;
+    private int animatorHealthHash;
+    private int animatorSpeedMultiplierHash;
 
 
     void Awake()
@@ -110,6 +115,7 @@ public class EnemyNavMeshAI : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         enemyAttack = GetComponent<EnemyAttack>();
+        stats = GetComponent<EnemyStats>();
     }
 
     void Start()
@@ -119,6 +125,8 @@ public class EnemyNavMeshAI : MonoBehaviour
         animatorVelocityXHash = Animator.StringToHash(animatorVelocityXParameter);
         animatorVelocityZHash = Animator.StringToHash(animatorVelocityZParameter);
         animatorIsDashingHash = Animator.StringToHash("IsDashing");
+        animatorHealthHash = Animator.StringToHash("HealthPercent");
+        animatorSpeedMultiplierHash = Animator.StringToHash("animationSpeedMultiplier");
         currentPatrolIndex = 0;
     }
 
@@ -193,7 +201,7 @@ public class EnemyNavMeshAI : MonoBehaviour
                 if (combatStyle == CombatStyle.Melee)
                 {
                     navMeshAgent.speed = meleeCirclingSpeed;
-                    navMeshAgent.stoppingDistance = 0;
+                    navMeshAgent.stoppingDistance = meleeCirclingDistance * 1.5f;
                     timeUntilMeleeDirectionChange = 0f;
                 }
                 else
@@ -719,13 +727,36 @@ public class EnemyNavMeshAI : MonoBehaviour
     }
     private void UpdateAnimator()
     {
-        float speed = (currentState == AIState.Attacking || currentState == AIState.Idle) ? 0f : navMeshAgent.velocity.magnitude;
         Vector3 localVelocity = transform.InverseTransformDirection(navMeshAgent.velocity);
-        float velocityX = localVelocity.x;
-        float velocityZ = localVelocity.z;
-        animator.SetFloat(animatorSpeedParamHash, speed);
+        float maxAgentSpeed = navMeshAgent.speed;
+
+        float velocityX = 0;
+        float velocityZ = 0;
+
+        if (maxAgentSpeed > 0.1f)
+        {
+            velocityX = Mathf.Clamp(localVelocity.x / maxAgentSpeed, -1f, 1f);
+            velocityZ = Mathf.Clamp(localVelocity.z / maxAgentSpeed, -1f, 1f);
+        }
+
+        float currentSpeed = navMeshAgent.velocity.magnitude;
+        float speedMultiplier = 1.0f;
+
+        if (animationBaseSpeed > 0.1f)
+        {
+            speedMultiplier = currentSpeed / animationBaseSpeed;
+        }
+
+        animator.SetFloat(animatorSpeedParamHash, currentSpeed);
         animator.SetFloat(animatorVelocityXHash, velocityX);
         animator.SetFloat(animatorVelocityZHash, velocityZ);
+        animator.SetFloat(animatorSpeedMultiplierHash, speedMultiplier);
+
+        if (stats != null)
+        {
+            float healthPercent = stats.CurrentHealth / stats.maxHealth;
+            animator.SetFloat(animatorHealthHash, healthPercent);
+        }
     }
     private bool CanSeePlayer(float distanceToPlayer)
     {
