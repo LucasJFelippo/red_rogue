@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public interface IGameManInterface
 {
@@ -11,6 +12,7 @@ public interface IGameManInterface
     (int, int) GetGameInfo();
 
     // Enemy
+    List<EnemyStats> getSpawnedEnemies { get; }
     void RegistryEnemy(EnemyStats enemy);
     void UnregistryEnemy(EnemyStats enemy);
 

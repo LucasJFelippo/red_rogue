@@ -81,7 +81,6 @@ public class PlayerAttack : MonoBehaviour
                 if (enemyStats != null)
                 {
                     enemyStats.TakeDamage(attackDamage);
-                    Debug.Log("Acertamos " + enemyCollider.name + "e causamos" + attackDamage + " de dano.");
                 }
                 enemiesHitThisAttack.Add(enemyCollider);
             }
@@ -130,7 +129,6 @@ public class PlayerAttack : MonoBehaviour
         if (comboInputReceived) // Se o jogador apertou o botão de novo...
         {
             comboCounter++;
-            Debug.Log(comboCounter);
             animator.SetInteger("ComboStep", comboCounter); // Prepara o próximo ataque
             comboInputReceived = false;
 

@@ -25703,9 +25703,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fc2ca9d92e8d7b4ea18d4f7f2b6327a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  arenaWidth: 60
+  arenaWidth: 20
   arenaHeight: 0
-  arenaDepth: 60
+  arenaDepth: 20
   minTilePerimeter: 4
   minTileWidth: 1.2
   minTileDepth: 0.8

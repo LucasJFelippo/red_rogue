@@ -54,7 +54,18 @@ public class LoadStage : AbstractState
 
         // Animation Phase
 
-        yield return arenaObj.FloorRisingAnimation();
+        yield return arenaObj.SpawnAnimation();
+
+        PlayerMovement playerMove = player.GetComponent<PlayerMovement>();
+        playerMove.enabled = false;
+        player.SetActive(true);
+
+        foreach (EnemyStats enemy in _gameManInter.getSpawnedEnemies) {
+            enemy.gameObject.SetActive(true);
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        playerMove.enabled = true;
 
     }
 }

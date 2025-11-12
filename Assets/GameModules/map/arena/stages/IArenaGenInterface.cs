@@ -13,5 +13,5 @@ public interface IArenaGenInterface
 
     List<GameObject> GetFloorTiles();
 
-    IEnumerator FloorRisingAnimation(float delay = 0.005f, float riseDistance = 10f, float duration = 0.3f);
+    IEnumerator SpawnAnimation(float delay = 0.005f, float riseDistance = 10f, float duration = 0.3f);
 }

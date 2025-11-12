@@ -464,7 +464,7 @@ MonoBehaviour:
     m_Bits: 64
   attackDashDistance: 1.5
   attackDashDuration: 0.15
-  attackDamage: 100
+  attackDamage: 1000
   attackDashForce: 5
 --- !u!1001 &3929919021691347977
 PrefabInstance:

@@ -50,8 +50,6 @@ public class EnemyStats : MonoBehaviour
 
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
-        Debug.Log($"{gameObject.name} took {damageAmount} damage. Current health: {currentHealth}/{maxHealth}");
-
         if (currentHealth <= 0)
         {
             Die();
@@ -73,7 +71,6 @@ public class EnemyStats : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
-        Debug.Log($"{gameObject.name} has died and will stop.");
         OnDeath?.Invoke();
 
         var aiComponent = GetComponent<EnemyNavMeshAI>();
@@ -114,6 +111,9 @@ public class EnemyStats : MonoBehaviour
             animatorComponent.SetFloat("MovementSpeed", 0);
             animatorComponent.SetTrigger("Death");
         }
+
+        IGameManInterface gameManager = GameManager.instance;
+        gameManager.UnregistryEnemy(this);
 
         Destroy(gameObject, 5f);
     }

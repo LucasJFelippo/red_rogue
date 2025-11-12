@@ -23,7 +23,6 @@ public class PlayerStats : MonoBehaviour
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
-        Debug.Log("Player tomou " + damage + " de dano. Vida restante: " + currentHealth);
 
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
@@ -36,7 +35,6 @@ public class PlayerStats : MonoBehaviour
     private void Die()
     {
         isDead = true;
-        Debug.Log("Player morreu!");
 
         // Dispara o evento de morte
         OnPlayerDeath?.Invoke();

@@ -63,8 +63,6 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
     public void GenerateArena()
     {
 
-        Debug.Log("Cleaning current arena registry");
-
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(transform.GetChild(i).gameObject);
@@ -451,11 +449,10 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
 
     #region Animation
 
-    public IEnumerator FloorRisingAnimation(float delay = 0.005f, float riseDistance = 10f, float duration = 0.3f)
+    public IEnumerator SpawnAnimation(float delay = 0.005f, float riseDistance = 10f, float duration = 0.1f)
     {
-        List<GameObject> tiless = _arenaTiles.floorTiles;
-        Debug.Log(tiless[1]);
-        foreach (GameObject tile in tiless)
+        List<GameObject> tile_array_for = _arenaTiles.floorTiles;
+        foreach (GameObject tile in tile_array_for)
         {
             tile.GetComponent<MeshRenderer>().enabled = true;
 

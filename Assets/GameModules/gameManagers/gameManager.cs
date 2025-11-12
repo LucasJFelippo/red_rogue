@@ -16,14 +16,18 @@ public class GameManager : MonoBehaviour, IGameManInterface
 
     [Header("Player")]
     public GameObject playerPrefab;
-    public GameObject getPlayerPrefab => playerPrefab;
 
     [Header("Enemies")]
     [SerializeField]
-    private List<EnemyStats> spawnedEnemies = new List<EnemyStats>();
+    public List<EnemyStats> spawnedEnemies = new List<EnemyStats>();
 
     private int gamePhase = 1;
     private int gameStage = 1;
+    
+    [Header("Getters")]
+    public GameObject getPlayerPrefab => playerPrefab;
+    public List<EnemyStats> getSpawnedEnemies => spawnedEnemies;
+
 
     void Awake()
     {
