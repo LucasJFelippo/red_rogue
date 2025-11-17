@@ -45,6 +45,7 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
 
     [Header("Internals")]
     private TileLists _arenaTiles = new TileLists(true);
+    private GameObject _endPortal = null;
     private GameObject _floorGameObject = null;
 
 
@@ -107,6 +108,12 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
             }
         }
 
+        // List<GameObject> wallList = new List<GameObject>(_arenaTiles.outerRightWallTiles);
+        // wallList.AddRange(_arenaTiles.outerLeftWallTiles);
+        // GameObject wall = wallList[UnityEngine.Random.Range(0, wallList.Count)];
+        // MeshRenderer wallRenderer = wall.GetComponent<MeshRenderer>();
+        // wallRenderer.enabled = false;
+
 
         if (Application.isPlaying)
         {
@@ -158,6 +165,7 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
         float f = fractureSize;
         Rect localTimeDim = new Rect(f, f, tileDim.width - f, tileDim.height - f);
         meshFilter.mesh = BuildFloorTileMesh(localTimeDim);
+        meshFilter.mesh.name = "MyProceduralMesh";
 
         var meshRenderer = gameObj.AddComponent<MeshRenderer>();
         meshRenderer.enabled = false;
@@ -468,13 +476,15 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
         yield return new WaitForSeconds(duration);
     }
 
-    // public IEnumerator StageCompletedAnimation()
-    // {
-    //     List<GameObject> wallList = _arenaTiles.outerRightWallTiles.AddRange(_arenaTiles.outerLeftWallTiles);
-    //     GameObject wall = wallList[Random.Range(0, wallList.Count)];
-    //     wallRenderer = wall.GetComponent<MeshRenderer>();
-    //     wallRenderer.enabled = false;
-    // }
+    public IEnumerator StageCompletedAnimation()
+    {
+        List<GameObject> wallList = new List<GameObject>(_arenaTiles.outerRightWallTiles);
+        wallList.AddRange(_arenaTiles.outerLeftWallTiles);
+        GameObject wall = wallList[UnityEngine.Random.Range(0, wallList.Count)];
+        MeshRenderer wallRenderer = wall.GetComponent<MeshRenderer>();
+        wallRenderer.enabled = false;
+        yield return new WaitForSeconds(0.1f);
+    }
 
     #endregion
 

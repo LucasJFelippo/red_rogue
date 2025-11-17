@@ -23,4 +23,5 @@ public interface IGameManInterface
 
     // Handlers
     Coroutine StartCoroutine(IEnumerator routine);
+    Transform GetChild(int index);
 }

@@ -72,3 +72,11 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+
+# Pluggins and Asset Store folders
+/[Aa]ssets/Pluggins/**
+/[Aa]ssets/AssetStore/**
+
+!/[Aa]ssets/Pluggins/plugginIndex.md
+!/[Aa]ssets/AssetStore/assetIndex.md

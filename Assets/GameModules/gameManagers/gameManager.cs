@@ -57,6 +57,8 @@ public class GameManager : MonoBehaviour, IGameManInterface
         _current_state.UpdateState();
     }
 
+
+    #region State Handling
     public void ChangeState(AbstractState newState)
     {
         _current_state = newState;
@@ -67,7 +69,10 @@ public class GameManager : MonoBehaviour, IGameManInterface
     {
         return (gamePhase, gameStage);
     }
+    #endregion
 
+
+    #region Enemy Handling
     public void RegistryEnemy(EnemyStats enemy)
     {
         spawnedEnemies.Add(enemy);
@@ -76,7 +81,22 @@ public class GameManager : MonoBehaviour, IGameManInterface
     public void UnregistryEnemy(EnemyStats enemy)
     {
         bool removed = spawnedEnemies.Remove(enemy);
+
+        if (spawnedEnemies.Count == 0)
+        {
+            if (_current_state is IStageFinisher finisher)
+            {
+                finisher.FinishStage();
+            }
+            else
+            {
+                Debug.LogWarning("SOMEONE IS UNREGISTRING ENEMIES");
+            }
+        }
     }
+    #endregion
+
 
     public Coroutine StartCoroutine(IEnumerator routine) => base.StartCoroutine(routine);
+    public Transform GetChild(int index) => transform.GetChild(index);
 }

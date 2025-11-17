@@ -4,7 +4,12 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 
-public class PlayStage : AbstractState
+public interface IStageFinisher
+{
+    void FinishStage();
+}
+
+public class PlayStage : AbstractState, IStageFinisher
 {
     public PlayStage(IGameManInterface context) 
         : base(context)
@@ -23,25 +28,10 @@ public class PlayStage : AbstractState
 
     public override void UpdateState()
     {
-        if (_gameManInter.getSpawnedEnemies.Count == 0) {
-            // _gameManInter.StartCoroutine(CompleteStageRoutine())
-            if (Input.GetKeyDown(KeyCode.E)) {
-                _gameManInter.gamePhase += 1;
-                if (_gameManInter.gamePhase > 5) {
-                    _gameManInter.gamePhase = 1;
-                    _gameManInter.gameStage += 1;
-                }
-                Debug.Log($"Player going to phase {_gameManInter.gamePhase} stage {_gameManInter.gameStage}");
-                _gameManInter.ChangeState(new LoadStage(_gameManInter));
-            }
-        }
     }
 
-    // private IEnumerator CompleteStageRoutine() {
-    //     _gameManInter.gamePhase += 1;
-    //     if (_gameManInter.gamePhase > 5) {
-    //         _gameManInter.gamePhase = 1;
-    //         _gameManInter.gameStage += 1;
-    //     }
-    // }
+    public void FinishStage()
+    {
+        _gameManInter.ChangeState(new CompletedStage(_gameManInter));
+    }
 }

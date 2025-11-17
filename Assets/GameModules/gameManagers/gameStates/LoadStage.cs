@@ -20,14 +20,13 @@ public class LoadStage : AbstractState
 
     public override void UpdateState()
     {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            _gameManInter.ChangeState(new MainMenuState(_gameManInter));
-        }
+
     }
 
     private IEnumerator LoadStageRoutine()
     {
+        _gameManInter.GetChild(0).gameObject.SetActive(true);
+
         var (gamePhase, gameStage) = _gameManInter.GetGameInfo();
         var sceneLoad = SceneManager.LoadSceneAsync($"s{gameStage}Arena", LoadSceneMode.Single);
 
@@ -54,9 +53,13 @@ public class LoadStage : AbstractState
 
         player.SetActive(false);
 
+        _gameManInter.GetChild(0).gameObject.SetActive(false);
+
         // Animation Phase
 
         yield return arenaObj.SpawnAnimation();
+
+        yield return new WaitForSeconds(2);
 
         PlayerMovement playerMove = player.GetComponent<PlayerMovement>();
         playerMove.enabled = false;
