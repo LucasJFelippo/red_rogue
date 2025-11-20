@@ -738,10 +738,6 @@ MonoBehaviour:
     m_Bits: 1073741824
   attackDashDistance: 1.5
   attackDashDuration: 0.15
-<<<<<<< HEAD
-  attackDamage: 20
-  attackDashForce: 5
-=======
   comboBufferDuration: 1
 --- !u!114 &2775059708176501511
 MonoBehaviour:
@@ -761,7 +757,6 @@ MonoBehaviour:
   precomputeOutline: 1
   bakeKeys: []
   bakeValues: []
->>>>>>> 8588e5a1a37501be3e20291245553c6c77952bc0
 --- !u!1001 &3929919021691347977
 PrefabInstance:
   m_ObjectHideFlags: 0
