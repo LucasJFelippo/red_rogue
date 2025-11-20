@@ -45,6 +45,7 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
 
     [Header("Internals")]
     private TileLists _arenaTiles = new TileLists(true);
+    private GameObject _endPortal = null;
     private GameObject _floorGameObject = null;
 
 
@@ -62,8 +63,6 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
     [ContextMenu("Generate Arena")]
     public void GenerateArena()
     {
-
-        Debug.Log("Cleaning current arena registry");
 
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
@@ -109,10 +108,16 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
             }
         }
 
+        // List<GameObject> wallList = new List<GameObject>(_arenaTiles.outerRightWallTiles);
+        // wallList.AddRange(_arenaTiles.outerLeftWallTiles);
+        // GameObject wall = wallList[UnityEngine.Random.Range(0, wallList.Count)];
+        // MeshRenderer wallRenderer = wall.GetComponent<MeshRenderer>();
+        // wallRenderer.enabled = false;
+
 
         if (Application.isPlaying)
         {
-            foreach (var tile in _arenaTiles.floorTiles) { tile.GetComponent<MeshRenderer>().enabled = true; }
+            // foreach (var tile in _arenaTiles.floorTiles) { tile.GetComponent<MeshRenderer>().enabled = true; }
         }
         else
         {
@@ -160,6 +165,7 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
         float f = fractureSize;
         Rect localTimeDim = new Rect(f, f, tileDim.width - f, tileDim.height - f);
         meshFilter.mesh = BuildFloorTileMesh(localTimeDim);
+        meshFilter.mesh.name = "MyProceduralMesh";
 
         var meshRenderer = gameObj.AddComponent<MeshRenderer>();
         meshRenderer.enabled = false;
@@ -446,6 +452,40 @@ public class s1Gen : MonoBehaviour, IArenaGenInterface
             SplitHalf(lowerRect, tile_array);
         }
     }
+    #endregion
+
+
+    #region Animation
+
+    public IEnumerator SpawnAnimation(float delay = 0.005f, float riseDistance = 10f, float duration = 0.1f)
+    {
+        List<GameObject> tile_array_for = _arenaTiles.floorTiles;
+        foreach (GameObject tile in tile_array_for)
+        {
+            tile.GetComponent<MeshRenderer>().enabled = true;
+
+            Vector3 startPos = tile.transform.localPosition;
+            Vector3 below = startPos - new Vector3(0f, riseDistance, 0f);
+
+            tile.transform.localPosition = below;
+
+            LeanTween.moveLocal(tile, startPos, duration).setEaseOutBack();
+
+            yield return new WaitForSeconds(delay);
+        }
+        yield return new WaitForSeconds(duration);
+    }
+
+    public IEnumerator StageCompletedAnimation()
+    {
+        List<GameObject> wallList = new List<GameObject>(_arenaTiles.outerRightWallTiles);
+        wallList.AddRange(_arenaTiles.outerLeftWallTiles);
+        GameObject wall = wallList[UnityEngine.Random.Range(0, wallList.Count)];
+        MeshRenderer wallRenderer = wall.GetComponent<MeshRenderer>();
+        wallRenderer.enabled = false;
+        yield return new WaitForSeconds(0.1f);
+    }
+
     #endregion
 
 

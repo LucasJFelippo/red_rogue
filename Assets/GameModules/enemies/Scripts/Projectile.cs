@@ -21,12 +21,10 @@ public class Projectile : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log("Projectile hit the player!");
             PlayerStats playerStats = collision.gameObject.GetComponent<PlayerStats>();
             if (playerStats != null)
             {
                 playerStats.TakeDamage(damage);
-                Debug.Log("Player take: " + damage + " damage");
             }
         }
         Destroy(gameObject);

@@ -1595,7 +1595,7 @@ PrefabInstance:
     - target: {fileID: 95096058574463750, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 2044af1e1f04f51489d388d4b0abf066, type: 2}
+      objectReference: {fileID: 9100000, guid: 20ceb7c5405a4aa47bc1efa4a3c5d1f2, type: 2}
     - target: {fileID: 111744052045278198, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -2065,7 +2065,7 @@ PrefabInstance:
     - target: {fileID: 95096058574463750, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 2044af1e1f04f51489d388d4b0abf066, type: 2}
+      objectReference: {fileID: 9100000, guid: 20ceb7c5405a4aa47bc1efa4a3c5d1f2, type: 2}
     - target: {fileID: 111744052045278198, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -2535,7 +2535,7 @@ PrefabInstance:
     - target: {fileID: 95096058574463750, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 2044af1e1f04f51489d388d4b0abf066, type: 2}
+      objectReference: {fileID: 9100000, guid: 20ceb7c5405a4aa47bc1efa4a3c5d1f2, type: 2}
     - target: {fileID: 111744052045278198, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -3005,7 +3005,7 @@ PrefabInstance:
     - target: {fileID: 95096058574463750, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 2044af1e1f04f51489d388d4b0abf066, type: 2}
+      objectReference: {fileID: 9100000, guid: 20ceb7c5405a4aa47bc1efa4a3c5d1f2, type: 2}
     - target: {fileID: 111744052045278198, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -3475,7 +3475,7 @@ PrefabInstance:
     - target: {fileID: 95096058574463750, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 2044af1e1f04f51489d388d4b0abf066, type: 2}
+      objectReference: {fileID: 9100000, guid: 20ceb7c5405a4aa47bc1efa4a3c5d1f2, type: 2}
     - target: {fileID: 111744052045278198, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       propertyPath: m_Enabled
       value: 1

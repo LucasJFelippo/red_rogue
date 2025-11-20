@@ -101249,15 +101249,8 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 1.65
-    functionName: OpenComboWindow
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 1.6833333
-    functionName: CloseComboWindowAndCheckNext
+  - time: 2.0166667
+    functionName: FinishAttackAnimation
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

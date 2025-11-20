@@ -46,6 +46,8 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
 
+        IGameManInterface gameManager = GameManager.instance;
+
         // TODO: MAGIC STUFF, CHANGE LATER
         int currentBudget = (int)(stageConfig.baseWeightBudget * Mathf.Pow(2f, (stage - 1) / 4f));
         int safetyBreak = 0;
@@ -78,6 +80,12 @@ public class EnemySpawner : MonoBehaviour
             {
                 enemy.patrolPoints = patrolPoints;
                 enemy.ActivateAI();
+            }
+            EnemyStats[] enemiesStatInGroup = spawnedGroupObject.GetComponentsInChildren<EnemyStats>();
+            foreach (EnemyStats enemy in enemiesStatInGroup)
+            {
+                enemy.gameObject.SetActive(false);
+                gameManager.RegistryEnemy(enemy);
             }
 
             currentBudget -= enemyGroupToSpawn.weight;

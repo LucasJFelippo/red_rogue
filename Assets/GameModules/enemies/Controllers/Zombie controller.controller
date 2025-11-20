@@ -178,7 +178,7 @@ AnimatorStateTransition:
     m_EventTreshold: 8
   - m_ConditionMode: 4
     m_ConditionEvent: HealthPercent
-    m_EventTreshold: 0.8
+    m_EventTreshold: 0.33
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 5093543677038207173}
   m_Solo: 0
@@ -404,8 +404,8 @@ AnimatorStateMachine:
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
   m_AnyStatePosition: {x: 810, y: 200, z: 0}
-  m_EntryPosition: {x: 40, y: 170, z: 0}
-  m_ExitPosition: {x: 40, y: 220, z: 0}
+  m_EntryPosition: {x: 40, y: 200, z: 0}
+  m_ExitPosition: {x: 40, y: 260, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
   m_DefaultState: {fileID: 5925787120316164532}
 --- !u!1101 &1149057594838657214
@@ -443,7 +443,11 @@ AnimatorStateTransition:
   m_Conditions:
   - m_ConditionMode: 4
     m_ConditionEvent: HealthPercent
+<<<<<<< HEAD
     m_EventTreshold: 0.9
+=======
+    m_EventTreshold: 0.33
+>>>>>>> 8588e5a1a37501be3e20291245553c6c77952bc0
   - m_ConditionMode: 3
     m_ConditionEvent: HealthPercent
     m_EventTreshold: 0.001
@@ -668,7 +672,7 @@ AnimatorStateTransition:
     m_EventTreshold: 0
   - m_ConditionMode: 3
     m_ConditionEvent: HealthPercent
-    m_EventTreshold: 0.8
+    m_EventTreshold: 0.33
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 5925787120316164532}
   m_Solo: 0
@@ -696,7 +700,7 @@ AnimatorStateTransition:
     m_EventTreshold: 0
   - m_ConditionMode: 4
     m_ConditionEvent: HealthPercent
-    m_EventTreshold: 0.8
+    m_EventTreshold: 0.33
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 5093543677038207173}
   m_Solo: 0
