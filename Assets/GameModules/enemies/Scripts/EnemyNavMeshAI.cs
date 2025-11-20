@@ -24,6 +24,8 @@ public class EnemyNavMeshAI : MonoBehaviour
     public Transform[] patrolPoints;
     public float patrolSpeed = 3.5f;
     public float patrolStoppingDistance = 1f;
+    public float patrolRandomRadius = 2.0f;
+    private float patrolTimeout = 0.01f;
 
     [Header("Pursuit Settings")]
     public float pursuitSpeed = 7f;
@@ -132,6 +134,7 @@ public class EnemyNavMeshAI : MonoBehaviour
 
     public void ActivateAI()
     {
+        navMeshAgent.updateRotation = false;
         SetState(AIState.Patrolling);
         InvokeRepeating(nameof(CheckConditions), 0, checkInterval);
     }
@@ -155,18 +158,47 @@ public class EnemyNavMeshAI : MonoBehaviour
 
         switch (currentState)
         {
-            case AIState.Patrolling: Patrol(); break;
-            case AIState.Pursuing: Pursue(); break;
-            case AIState.Lurking: Lurk(); break;
-            case AIState.Telegraphing: Telegraph(); break;
-            case AIState.Attacking: Attack(); break;
-            case AIState.Repositioning: Repositioning(); break;
-            case AIState.Fleeing: Flee(); break;
-            case AIState.TelegraphingSpit: TelegraphSpit(); break;
+            case AIState.Patrolling:
+                Patrol();
+                RotateTowardsMovementDirection();
+                break;
+
+            case AIState.Pursuing:
+                Pursue();
+                RotateTowardsMovementDirection();
+                break;
+
+            case AIState.Lurking:
+                Lurk();
+                if (playerTarget != null) FaceTarget(playerTarget.position);
+                break;
+
+            case AIState.Telegraphing:
+                Telegraph();
+                if (playerTarget != null) FaceTarget(playerTarget.position);
+                break;
+
+            case AIState.Attacking:
+                Attack();
+                break;
+
+            case AIState.Repositioning:
+                Repositioning();
+                if (playerTarget != null) FaceTarget(playerTarget.position);
+                break;
+
+            case AIState.Fleeing:
+                Flee();
+                RotateTowardsMovementDirection();
+                break;
+
+            case AIState.TelegraphingSpit:
+                TelegraphSpit();
+                if (playerTarget != null) FaceTarget(playerTarget.position);
+                break;
         }
         UpdateAnimator();
     }
-
     private void SetState(AIState newState)
     {
         if (isDashing) return;
@@ -382,15 +414,39 @@ public class EnemyNavMeshAI : MonoBehaviour
     {
         if (isDashing) return;
         if (patrolPoints == null || patrolPoints.Length == 0) return;
-        if (!navMeshAgent.pathPending && navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
+        patrolTimeout += Time.deltaTime;
+
+        if (!navMeshAgent.pathPending && (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance || patrolTimeout > 10f))
         {
             currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Length;
-            navMeshAgent.SetDestination(patrolPoints[currentPatrolIndex].position);
+            SetPatrolDestination(patrolPoints[currentPatrolIndex].position);
+            patrolTimeout = 0f;
+        }
+    }
+
+    private void SetPatrolDestination(Vector3 targetPoint)
+    {
+        Vector2 randomCircle = Random.insideUnitCircle * patrolRandomRadius;
+        Vector3 randomPos = targetPoint + new Vector3(randomCircle.x, 0, randomCircle.y);
+
+        if (NavMesh.SamplePosition(randomPos, out NavMeshHit hit, 5.0f, NavMesh.AllAreas))
+        {
+            navMeshAgent.SetDestination(hit.position);
+        }
+        else
+        {
+            navMeshAgent.SetDestination(targetPoint);
         }
     }
     private void Pursue()
     {
-        if (playerTarget != null) navMeshAgent.SetDestination(playerTarget.position);
+        if (playerTarget != null)
+        {
+            Vector3 playerVelocity = Vector3.zero;
+            float predictionTime = 0.5f;
+            Vector3 futurePosition = playerTarget.position + (playerVelocity * predictionTime);
+            navMeshAgent.SetDestination(futurePosition);
+        }
     }
     private void Lurk()
     {
@@ -402,6 +458,7 @@ public class EnemyNavMeshAI : MonoBehaviour
     private void LurkMelee()
     {
         if (isDashing || playerTarget == null) return;
+
         timeSinceLastDash += Time.deltaTime;
         timeSinceLastSpit += Time.deltaTime;
 
@@ -416,7 +473,7 @@ public class EnemyNavMeshAI : MonoBehaviour
         if (timeSinceLastDash >= meleeDashInterval - dashApproachDuration)
         {
             navMeshAgent.speed = pursuitSpeed;
-            navMeshAgent.stoppingDistance = enemyAttack.attackRange * 1.5f;
+            navMeshAgent.stoppingDistance = enemyAttack.attackRange * 0.8f;
             navMeshAgent.SetDestination(playerTarget.position);
             return;
         }
@@ -426,31 +483,21 @@ public class EnemyNavMeshAI : MonoBehaviour
 
         if (spitAttackComponent != null && timeSinceLastSpit >= spitCooldown && Random.value < spitChance)
         {
-            float distanceToPlayer = Vector3.Distance(transform.position, playerTarget.position);
-            if (distanceToPlayer <= spitAttackComponent.attackRange && CanSeePlayer(distanceToPlayer))
+            float d = Vector3.Distance(transform.position, playerTarget.position);
+            if (d <= spitAttackComponent.attackRange && CanSeePlayer(d))
             {
                 SetState(AIState.TelegraphingSpit);
                 return;
             }
         }
-
         timeUntilMeleeDirectionChange -= Time.deltaTime;
-
-        if (timeUntilMeleeDirectionChange <= 0f || (!navMeshAgent.pathPending && navMeshAgent.remainingDistance < 0.5f))
+        if (timeUntilMeleeDirectionChange <= 0f)
         {
-            timeUntilMeleeDirectionChange = Random.Range(meleeDirectionChangeInterval * 0.6f, meleeDirectionChangeInterval * 1.1f);
+            timeUntilMeleeDirectionChange = Random.Range(meleeDirectionChangeInterval, meleeDirectionChangeInterval * 1.5f);
             circlingDirection = (Random.value > 0.5f) ? 1 : -1;
-
-            Vector3 directionToPlayer = (transform.position - playerTarget.position).normalized;
-            Vector3 idealPosition = playerTarget.position + directionToPlayer * meleeCirclingDistance;
-            Vector3 perpendicularDirection = Vector3.Cross(directionToPlayer, Vector3.up).normalized * circlingDirection;
-            Vector3 finalDestination = idealPosition + perpendicularDirection * 5f;
-
-            if (NavMesh.SamplePosition(finalDestination, out NavMeshHit hit, 5f, NavMesh.AllAreas))
-            {
-                navMeshAgent.SetDestination(hit.position);
-            }
         }
+
+        CalculateStrafePosition(meleeCirclingDistance);
     }
 
     private void TelegraphSpit()
@@ -549,6 +596,8 @@ public class EnemyNavMeshAI : MonoBehaviour
     private void Attack()
     {
         if (playerTarget == null) { SetState(AIState.Patrolling); return; }
+        navMeshAgent.velocity = Vector3.zero;
+        navMeshAgent.isStopped = true;
 
         if (isPerformingSpit)
         {
@@ -618,6 +667,32 @@ public class EnemyNavMeshAI : MonoBehaviour
             StartCoroutine(DashReposition(hit.position, dashDuration));
         }
     }
+
+    private void CalculateStrafePosition(float radius)
+    {
+        if (playerTarget == null) return;
+        Vector3 dirToPlayer = (playerTarget.position - transform.position).normalized;
+        Vector3 strafeDir = Vector3.Cross(dirToPlayer, Vector3.up) * circlingDirection;
+
+        if (Physics.Raycast(transform.position + Vector3.up, strafeDir, 2.0f, obstacleMask))
+        {
+            circlingDirection *= -1;
+        }
+
+        Vector3 offsetToEnemy = transform.position - playerTarget.position;
+        float currentAngle = Mathf.Atan2(offsetToEnemy.z, offsetToEnemy.x);
+
+        float lookAheadAngle = 30f * Mathf.Deg2Rad;
+        float targetAngle = currentAngle + (circlingDirection * lookAheadAngle);
+
+        Vector3 targetOffset = new Vector3(Mathf.Cos(targetAngle), 0, Mathf.Sin(targetAngle)) * radius;
+        Vector3 idealPos = playerTarget.position + targetOffset;
+
+        if (NavMesh.SamplePosition(idealPos, out NavMeshHit hit, 4.0f, NavMesh.AllAreas))
+        {
+            navMeshAgent.SetDestination(hit.position);
+        }
+    }
     private void LurkRanged()
     {
         if (playerTarget == null) return;
@@ -625,104 +700,40 @@ public class EnemyNavMeshAI : MonoBehaviour
         if (timeUntilTacticChange <= 0f)
         {
             timeUntilTacticChange = Random.Range(rangedTacticChangeInterval * 0.8f, rangedTacticChangeInterval * 1.2f);
-
-            if (Random.value > 0.5f)
-            {
-                currentKiteWeight = kitingWeight;
-                currentStrafeWeight = strafeWeight * 0.2f;
-            }
-            else
-            {
-                currentKiteWeight = kitingWeight * 0.2f;
-                currentStrafeWeight = strafeWeight;
-                circlingDirection = (Random.value > 0.5f) ? 1 : -1;
-            }
+            if (Random.value > 0.5f) circlingDirection *= -1;
         }
 
         float distanceToPlayer = Vector3.Distance(transform.position, playerTarget.position);
-        bool isPanicked = (distanceToPlayer <= playerPanicDistance);
-        Vector3 kitingDirection = (transform.position - playerTarget.position).normalized;
-        if (kitingDirection == Vector3.zero) kitingDirection = -transform.forward;
-        Vector3 rayOrigin = transform.position + Vector3.up * 1.0f;
-        bool isAgainstWall = Physics.Raycast(rayOrigin, kitingDirection, wallAvoidDistance, obstacleMask);
-
-        if (isPanicked && isAgainstWall)
+        if (distanceToPlayer <= playerPanicDistance)
         {
             SetState(AIState.Fleeing);
             return;
         }
+        CalculateStrafePosition(desiredRangedDistance);
+    }
+    private void RotateTowardsMovementDirection()
+    {
+        Vector3 direction = navMeshAgent.desiredVelocity;
 
-        if (navMeshAgent.hasPath && navMeshAgent.velocity.sqrMagnitude < 0.1f * 0.1f)
+        if (direction.sqrMagnitude > 0.1f)
         {
-            timeStuck += Time.deltaTime;
-        }
-        else
-        {
-            timeStuck = 0f;
-        }
-        bool isStuck = timeStuck > 0.5f;
-
-        timeUntilRangedMoveTick -= Time.deltaTime;
-        if (timeUntilRangedMoveTick <= 0f || isStuck)
-        {
-            timeUntilRangedMoveTick = Random.Range(repositionTickRate * 0.8f, repositionTickRate * 1.2f);
-            if (isStuck)
+            direction.y = 0;
+            if (direction != Vector3.zero)
             {
-                timeStuck = 0f;
-                circlingDirection *= -1;
-            }
-
-            Vector3 directionToPlayerNormalized = (playerTarget.position - transform.position).normalized;
-
-            Vector3 kitingVector = Vector3.zero;
-            float distanceError = distanceToPlayer - desiredRangedDistance;
-            if (Mathf.Abs(distanceError) > distanceDeadzone)
-            {
-                kitingVector = directionToPlayerNormalized * distanceError;
-            }
-
-            Vector3 strafeVector = Vector3.Cross(directionToPlayerNormalized, transform.up).normalized * circlingDirection;
-
-            if (Physics.Raycast(rayOrigin, strafeVector, 2.0f, obstacleMask))
-            {
-                strafeVector = Vector3.zero;
-                circlingDirection *= -1;
-                timeUntilTacticChange = 0f;
-            }
-
-            Vector3 combinedDirection = (kitingVector * currentKiteWeight + strafeVector * currentStrafeWeight).normalized;
-
-            if (combinedDirection.sqrMagnitude > 0.1f)
-            {
-                float lookAheadDistance = 4f;
-                Vector3 targetPosition = transform.position + combinedDirection * lookAheadDistance;
-
-                if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, lookAheadDistance, NavMesh.AllAreas))
-                {
-                    navMeshAgent.SetDestination(hit.position);
-                }
-                else
-                {
-                    Vector3 kitingTarget = transform.position + (kitingVector.normalized * lookAheadDistance);
-                    if (kitingVector.sqrMagnitude > 0.1f && NavMesh.SamplePosition(kitingTarget, out NavMeshHit kitingHit, lookAheadDistance, NavMesh.AllAreas))
-                    {
-                        navMeshAgent.SetDestination(kitingHit.position);
-                    }
-                }
-            }
-            else
-            {
-                navMeshAgent.ResetPath();
+                Quaternion lookRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
             }
         }
     }
     private void FaceTarget(Vector3 target)
     {
         Vector3 direction = (target - transform.position).normalized;
-        if (direction == Vector3.zero) return;
         direction.y = 0;
-        Quaternion lookRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * navMeshAgent.angularSpeed);
+        if (direction != Vector3.zero)
+        {
+            Quaternion lookRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 20f);
+        }
     }
     private void UpdateAnimator()
     {
