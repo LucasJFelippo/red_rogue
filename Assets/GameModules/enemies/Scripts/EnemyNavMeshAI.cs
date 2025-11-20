@@ -283,7 +283,6 @@ public class EnemyNavMeshAI : MonoBehaviour
     {
         isDashing = true;
         animator.SetBool(animatorIsDashingHash, true);
-        Debug.Log("Dash realizado");
         navMeshAgent.enabled = false;
 
         Vector3 startPosition = transform.position;
