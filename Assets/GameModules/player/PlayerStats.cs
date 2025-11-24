@@ -33,6 +33,19 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
+    public void Heal(float amount)
+    {
+        if (isDead) return;
+        int healAmount = Mathf.RoundToInt(amount);
+
+        currentHealth += healAmount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+        Debug.Log("Player curou " + healAmount + ". Vida atual: " + currentHealth);
+
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
     private void Die()
     {
         isDead = true;

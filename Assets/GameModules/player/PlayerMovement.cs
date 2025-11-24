@@ -32,12 +32,18 @@ public class PlayerMovement : MonoBehaviour
     private float nextActionTime = 0f;
     private Coroutine dashCoroutine;
 
+    // --- Variáveis para PowerUp ---
+    private float defaultRunSpeed;
+    private Coroutine speedBoostCoroutine;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         capsule = GetComponent<CapsuleCollider>();
         playerAttack = GetComponent<PlayerAttack>();
+
+        defaultRunSpeed = runSpeed;
 
         controls = new PlayerInputActions();
         controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
@@ -48,6 +54,25 @@ public class PlayerMovement : MonoBehaviour
 
     void OnEnable() => controls.Enable();
     void OnDisable() => controls.Disable();
+
+    public void ApplySpeedBoost(float multiplier, float duration)
+    {
+        if (speedBoostCoroutine != null)
+        {
+            StopCoroutine(speedBoostCoroutine);
+        }
+        speedBoostCoroutine = StartCoroutine(SpeedBoostRoutine(multiplier, duration));
+    }
+
+    private IEnumerator SpeedBoostRoutine(float multiplier, float duration)
+    {
+        runSpeed = defaultRunSpeed * multiplier;
+
+        yield return new WaitForSeconds(duration);
+
+        runSpeed = defaultRunSpeed;
+        speedBoostCoroutine = null;
+    }
 
     void FixedUpdate()
     {

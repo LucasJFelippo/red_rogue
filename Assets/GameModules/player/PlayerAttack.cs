@@ -35,6 +35,8 @@ public class PlayerAttack : MonoBehaviour
     private Coroutine comboWindowCoroutine;
     private List<Collider> enemiesHitThisAttack;
     private bool isHitboxActive = false;
+    private int defaultDamage;
+    private Coroutine damageBoostCoroutine;
 
     void Awake()
     {
@@ -44,6 +46,7 @@ public class PlayerAttack : MonoBehaviour
         controls = new PlayerInputActions();
         controls.Player.Attack.performed += ctx => TryAttack();
         enemiesHitThisAttack = new List<Collider>();
+        defaultDamage = attackDamage;
     }
 
     void OnEnable() => controls.Enable();
@@ -55,6 +58,24 @@ public class PlayerAttack : MonoBehaviour
         if (isHitboxActive) { PerformHitCheck(); }
     }
 
+    public void ApplyDamageBoost(float multiplier, float duration)
+    {
+        if (damageBoostCoroutine != null)
+        {
+            StopCoroutine(damageBoostCoroutine);
+        }
+        damageBoostCoroutine = StartCoroutine(DamageBoostRoutine(multiplier, duration));
+    }
+
+    private IEnumerator DamageBoostRoutine(float multiplier, float duration)
+    {
+        attackDamage = Mathf.RoundToInt(defaultDamage * multiplier);
+
+        yield return new WaitForSeconds(duration);
+
+        attackDamage = defaultDamage;
+        damageBoostCoroutine = null;
+    }
     private void TryAttack()
     {
         PlayerMovement pm = GetComponent<PlayerMovement>();
