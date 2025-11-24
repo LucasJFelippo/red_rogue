@@ -7,7 +7,6 @@ public class EnemyHealthOutline : MonoBehaviour
     public EnemyStats enemyStats;
 
     [Header("Configurações")]
-    [Tooltip("Espessura da linha. Pode ser ajustada em tempo real.")]
     [Range(0f, 10f)]
     public float width = 1.2f;
 
@@ -20,10 +19,7 @@ public class EnemyHealthOutline : MonoBehaviour
 
     void Start()
     {
-        // Configuração inicial
         outline.OutlineMode = Outline.Mode.OutlineAll;
-
-        // Aplica a largura definida no Inspector
         outline.OutlineWidth = width;
 
         if (enemyStats != null)
@@ -40,8 +36,6 @@ public class EnemyHealthOutline : MonoBehaviour
 
     void Update()
     {
-        // Permite ajustar a espessura dinamicamente pelo Inspector deste script
-        // Se o valor mudar, aplicamos ao componente Outline
         if (outline.OutlineWidth != width)
         {
             outline.OutlineWidth = width;
@@ -63,12 +57,10 @@ public class EnemyHealthOutline : MonoBehaviour
 
         if (healthPercent >= 0.5f)
         {
-            // Transição Amarelo -> Verde
             newColor = Color.Lerp(Color.yellow, Color.green, (healthPercent - 0.5f) * 2f);
         }
         else
         {
-            // Transição Vermelho -> Amarelo
             newColor = Color.Lerp(Color.red, Color.yellow, healthPercent * 2f);
         }
 

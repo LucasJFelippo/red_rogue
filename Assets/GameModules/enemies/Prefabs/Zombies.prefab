@@ -292,6 +292,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1112338128624330, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4475435510236835162}
+    - targetCorrespondingSourceObject: {fileID: 1112338128624330, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6432323323725717001}
   m_SourcePrefab: {fileID: 100100000, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
 --- !u!4 &2073563096475557914 stripped
 Transform:
@@ -385,7 +388,7 @@ MonoBehaviour:
   attackRange: 3
   attackDuration: 0.6
   animatorAttackTrigger: Attack
-  projectilePrefab: {fileID: 2877784644291625097, guid: f73a39cb3ef6d414d8855edeeea2a4c4, type: 3}
+  projectilePrefab: {fileID: 7541299261854152833, guid: c8f79bd3a6d248a4e81ae337ee623a86, type: 3}
   projectileSpawnPoint: {fileID: 2073563096475557914}
 --- !u!195 &3631092027464448323
 NavMeshAgent:
@@ -549,6 +552,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthOutline
   enemyStats: {fileID: 357544166459573703}
   width: 1.2
+--- !u!114 &6432323323725717001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077345552744537968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ef65c9257abb2d438544fcca8025e2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDeathBlinker
+  blinkInterval: 0.25
+  startDelay: 2
+  accelerateBlinking: 1
 --- !u!4 &2078551451624841012 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
@@ -798,6 +816,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1112338128624330, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8429412451441317450}
+    - targetCorrespondingSourceObject: {fileID: 1112338128624330, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9121404326486017125}
   m_SourcePrefab: {fileID: 100100000, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
 --- !u!4 &3605089434195703127 stripped
 Transform:
@@ -891,7 +912,7 @@ MonoBehaviour:
   attackRange: 3
   attackDuration: 0.6
   animatorAttackTrigger: Attack
-  projectilePrefab: {fileID: 2877784644291625097, guid: f73a39cb3ef6d414d8855edeeea2a4c4, type: 3}
+  projectilePrefab: {fileID: 7541299261854152833, guid: c8f79bd3a6d248a4e81ae337ee623a86, type: 3}
   projectileSpawnPoint: {fileID: 3610022762217720441}
 --- !u!195 &6827232192284908639
 NavMeshAgent:
@@ -1055,6 +1076,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthOutline
   enemyStats: {fileID: 8666652709201256808}
   width: 1.2
+--- !u!114 &9121404326486017125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3606135300508906771}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ef65c9257abb2d438544fcca8025e2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDeathBlinker
+  blinkInterval: 0.25
+  startDelay: 2
+  accelerateBlinking: 1
 --- !u!4 &3610022762217720441 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4789241475065248, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
@@ -1304,6 +1340,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1112338128624330, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2582091812719680382}
+    - targetCorrespondingSourceObject: {fileID: 1112338128624330, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6191846991362433029}
   m_SourcePrefab: {fileID: 100100000, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
 --- !u!4 &4768806124854089332 stripped
 Transform:
@@ -1402,7 +1441,7 @@ MonoBehaviour:
   attackRange: 3
   attackDuration: 0.6
   animatorAttackTrigger: Attack
-  projectilePrefab: {fileID: 2877784644291625097, guid: f73a39cb3ef6d414d8855edeeea2a4c4, type: 3}
+  projectilePrefab: {fileID: 7541299261854152833, guid: c8f79bd3a6d248a4e81ae337ee623a86, type: 3}
   projectileSpawnPoint: {fileID: 4768806124854089332}
 --- !u!195 &1406027970619840182
 NavMeshAgent:
@@ -1566,6 +1605,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthOutline
   enemyStats: {fileID: 2314714043392049379}
   width: 1.2
+--- !u!114 &6191846991362433029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4772904693074045214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ef65c9257abb2d438544fcca8025e2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDeathBlinker
+  blinkInterval: 0.25
+  startDelay: 2
+  accelerateBlinking: 1
 --- !u!1001 &6000103002903251866
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1810,6 +1864,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1112338128624330, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7145546049629294946}
+    - targetCorrespondingSourceObject: {fileID: 1112338128624330, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6020451876823004375}
   m_SourcePrefab: {fileID: 100100000, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
 --- !u!1 &6000859922588979536 stripped
 GameObject:
@@ -1898,7 +1955,7 @@ MonoBehaviour:
   attackRange: 3
   attackDuration: 0.6
   animatorAttackTrigger: Attack
-  projectilePrefab: {fileID: 2877784644291625097, guid: f73a39cb3ef6d414d8855edeeea2a4c4, type: 3}
+  projectilePrefab: {fileID: 7541299261854152833, guid: c8f79bd3a6d248a4e81ae337ee623a86, type: 3}
   projectileSpawnPoint: {fileID: 6004888394852789818}
 --- !u!195 &1202468739762464038
 NavMeshAgent:
@@ -2062,6 +2119,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthOutline
   enemyStats: {fileID: 2420720208362726249}
   width: 1.2
+--- !u!114 &6020451876823004375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6000859922588979536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ef65c9257abb2d438544fcca8025e2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDeathBlinker
+  blinkInterval: 0.25
+  startDelay: 2
+  accelerateBlinking: 1
 --- !u!4 &6001925014245380372 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4427613559659150, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
@@ -2316,6 +2388,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1112338128624330, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6803290123442723057}
+    - targetCorrespondingSourceObject: {fileID: 1112338128624330, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8595619910100139581}
   m_SourcePrefab: {fileID: 100100000, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
 --- !u!4 &6594188832217863482 stripped
 Transform:
@@ -2409,7 +2484,7 @@ MonoBehaviour:
   attackRange: 3
   attackDuration: 0.6
   animatorAttackTrigger: Attack
-  projectilePrefab: {fileID: 2877784644291625097, guid: f73a39cb3ef6d414d8855edeeea2a4c4, type: 3}
+  projectilePrefab: {fileID: 7541299261854152833, guid: c8f79bd3a6d248a4e81ae337ee623a86, type: 3}
   projectileSpawnPoint: {fileID: 6601708469303241236}
 --- !u!195 &8376432710769307953
 NavMeshAgent:
@@ -2573,6 +2648,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthOutline
   enemyStats: {fileID: 2665115399356924519}
   width: 1.2
+--- !u!114 &8595619910100139581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6597503525408363902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ef65c9257abb2d438544fcca8025e2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDeathBlinker
+  blinkInterval: 0.25
+  startDelay: 2
+  accelerateBlinking: 1
 --- !u!4 &6601708469303241236 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4789241475065248, guid: e7965cb5f3b6b49439772edd4131b2b0, type: 3}
