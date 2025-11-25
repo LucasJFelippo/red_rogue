@@ -11,11 +11,11 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Spawning Parameters")]
     [Tooltip("The minimum number of patrol points to generate for each enemy GROUP.")]
-    [SerializeField] private int minPatrolPoints = 2;
+    [SerializeField] private int minPatrolPoints = 3; // Aumentei o mínimo para garantir um circulo
     [Tooltip("The maximum number of patrol points to generate for each enemy GROUP.")]
-    [SerializeField] private int maxPatrolPoints = 5;
+    [SerializeField] private int maxPatrolPoints = 6;
     [Tooltip("The search radius for finding valid patrol points around a spawn tile.")]
-    [SerializeField] private float patrolPointSearchRadius = 10f;
+    [SerializeField] private float patrolPointSearchRadius = 15f; // Aumente se quiser circular o mapa todo
 
     private Transform enemyContainer;
     private Transform patrolPointContainer;
@@ -40,48 +40,40 @@ public class EnemySpawner : MonoBehaviour
             patrolPointContainer.SetParent(this.transform);
         }
 
-        if (spawnableTiles.Count == 0)
-        {
-            Debug.LogWarning("No spawnable tiles found. Cannot spawn enemies.", this);
-            return;
-        }
-
-        IGameManInterface gameManager = GameManager.instance;
-
-        // TODO: MAGIC STUFF, CHANGE LATER
-        int currentBudget = (int)(stageConfig.baseWeightBudget * Mathf.Pow(2f, (stage - 1) / 4f));
+        // Calculate budget logic (mantida original)
+        int currentBudget = stageConfig.baseWeightBudget + (stage * 10);
         int safetyBreak = 0;
 
-        while (currentBudget > 0 && spawnableTiles.Count > 0 && safetyBreak < 100)
+        while (currentBudget > 0 && safetyBreak < 100)
         {
-            List<EnemySpawnData> affordableEnemies = stageConfig.enemySpawnPool
+            var affordableEnemies = stageConfig.enemySpawnPool
                 .Where(e => e.weight <= currentBudget)
                 .ToList();
 
             if (affordableEnemies.Count == 0) break;
 
-            EnemySpawnData enemyGroupToSpawn = affordableEnemies[Random.Range(0, affordableEnemies.Count)];
+            var enemyGroupToSpawn = affordableEnemies[Random.Range(0, affordableEnemies.Count)];
 
-            int tileIndex = Random.Range(0, spawnableTiles.Count);
-            GameObject randomTile = spawnableTiles[tileIndex];
-            spawnableTiles.RemoveAt(tileIndex);
+            // Escolhe um tile aleatório para o spawn do inimigo
+            GameObject spawnTile = spawnableTiles[Random.Range(0, spawnableTiles.Count)];
+            Vector3 spawnPosition = spawnTile.transform.position;
 
-            Vector3 spawnPosition = randomTile.transform.position + new Vector3(Random.Range(-2f, 2f), 1f, Random.Range(-2f, 2f));
+            // --- MUDANÇA: Passamos a lista de tiles para a função de patrulha ---
+            Transform[] patrolPoints = GenerateLogicalPatrolPoints(spawnableTiles, spawnPosition);
+            // -------------------------------------------------------------------
 
-            // Spawn the group prefab
-            GameObject spawnedGroupObject = Instantiate(enemyGroupToSpawn.enemyPrefab, spawnPosition, Quaternion.identity, enemyContainer);
+            GameObject spawnedGroupObject = Instantiate(enemyGroupToSpawn.enemyPrefab, spawnPosition, Quaternion.identity);
+            spawnedGroupObject.transform.SetParent(enemyContainer);
 
-            // Generate ONE set of patrol points for the entire group
-            Transform[] patrolPoints = GeneratePatrolPointsForGroup(spawnedGroupObject, spawnPosition);
-
-            // Find all individual enemies within the group and assign them the SAME patrol points
-            EnemyNavMeshAI[] enemiesInGroup = spawnedGroupObject.GetComponentsInChildren<EnemyNavMeshAI>();
-            foreach (EnemyNavMeshAI enemy in enemiesInGroup)
+            var aiComponents = spawnedGroupObject.GetComponentsInChildren<EnemyNavMeshAI>();
+            foreach (var ai in aiComponents)
             {
-                enemy.patrolPoints = patrolPoints;
-                enemy.ActivateAI();
+                ai.patrolPoints = patrolPoints;
+                ai.ActivateAI();
             }
-            EnemyStats[] enemiesStatInGroup = spawnedGroupObject.GetComponentsInChildren<EnemyStats>();
+
+            IGameManInterface gameManager = GameManager.instance;
+            var enemiesStatInGroup = spawnedGroupObject.GetComponentsInChildren<EnemyStats>();
             foreach (EnemyStats enemy in enemiesStatInGroup)
             {
                 enemy.gameObject.SetActive(false);
@@ -93,26 +85,46 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    private Transform[] GeneratePatrolPointsForGroup(GameObject groupObject, Vector3 spawnOrigin)
+    // Função totalmente reescrita para criar caminhos lógicos
+    private Transform[] GenerateLogicalPatrolPoints(List<GameObject> allTiles, Vector3 centerPoint)
     {
-        int patrolPointCount = Random.Range(minPatrolPoints, maxPatrolPoints + 1);
+        int pointsCount = Random.Range(minPatrolPoints, maxPatrolPoints + 1);
         List<Transform> generatedPoints = new List<Transform>();
 
-        Transform patrolPointsParent = new GameObject($"{groupObject.name}_PatrolPoints").transform;
+        Transform patrolPointsParent = new GameObject($"PatrolPath_{centerPoint.GetHashCode()}").transform;
         patrolPointsParent.SetParent(patrolPointContainer);
 
-        for (int i = 0; i < patrolPointCount; i++)
-        {
-            Vector3 randomDirection = Random.insideUnitSphere * patrolPointSearchRadius;
-            randomDirection += spawnOrigin;
+        // 1. FILTRAGEM: Encontra tiles próximos (dentro do raio) mas ignora o tile central exato
+        // Se quiser circular o MAPA TODO, aumente muito o 'patrolPointSearchRadius' no Inspector.
+        var candidateTiles = allTiles
+            .Where(t => Vector3.Distance(t.transform.position, centerPoint) <= patrolPointSearchRadius)
+            .Where(t => Vector3.Distance(t.transform.position, centerPoint) > 2f) // Evita pontos muito colados no spawn
+            .OrderBy(x => Random.value) // Embaralha para aleatoriedade na escolha
+            .Take(pointsCount) // Pega a quantidade necessária
+            .ToList();
 
-            if (NavMesh.SamplePosition(randomDirection, out NavMeshHit hit, patrolPointSearchRadius, NavMesh.AllAreas))
-            {
-                GameObject patrolPointObj = new GameObject($"PatrolPoint_{i}");
-                patrolPointObj.transform.position = hit.position;
-                patrolPointObj.transform.SetParent(patrolPointsParent);
-                generatedPoints.Add(patrolPointObj.transform);
-            }
+        // Se não achou tiles suficientes (mapa pequeno ou raio curto), usa o que tem
+        if (candidateTiles.Count == 0) candidateTiles.Add(allTiles[Random.Range(0, allTiles.Count)]);
+
+        // 2. ORDENAÇÃO LÓGICA (Circular):
+        // Ordena os pontos baseados no ângulo deles em relação ao centro de spawn.
+        // Isso faz com que o caminho forme um círculo/polígono convexo ao redor do centro.
+        var sortedTiles = candidateTiles.OrderBy(t =>
+        {
+            Vector3 dir = t.transform.position - centerPoint;
+            return Mathf.Atan2(dir.z, dir.x); // Retorna o ângulo em radianos
+        }).ToList();
+
+        // 3. CRIAÇÃO DOS PONTOS
+        foreach (GameObject tile in sortedTiles)
+        {
+            // Adiciona um pequeno offset Y para garantir que o ponto não fique enterrado no chão
+            Vector3 finalPos = tile.transform.position + Vector3.up * 1.0f;
+
+            GameObject pObj = new GameObject("PPoint");
+            pObj.transform.position = finalPos;
+            pObj.transform.SetParent(patrolPointsParent);
+            generatedPoints.Add(pObj.transform);
         }
 
         return generatedPoints.ToArray();

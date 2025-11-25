@@ -3447,7 +3447,7 @@ MonoBehaviour:
   stageConfig: {fileID: 11400000, guid: fe4085b983fb8f7479afda72a9b68bd5, type: 2}
   minPatrolPoints: 5
   maxPatrolPoints: 10
-  patrolPointSearchRadius: 25
+  patrolPointSearchRadius: 20
 --- !u!4 &198159545
 Transform:
   m_ObjectHideFlags: 0
