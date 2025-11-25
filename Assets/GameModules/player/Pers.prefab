@@ -581,6 +581,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   runSpeed: 11
   rotationSpeed: 15
+  attackMovementMultiplier: 0.4
   wallLayer:
     serializedVersion: 2
     m_Bits: 1073741824
@@ -734,16 +735,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackPoint: {fileID: 6010389174402576535}
-  attackRange: 21.9
   attackDamage: 15
-  enemyLayers:
-    serializedVersion: 2
-    m_Bits: 64
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 1073741824
-  attackDashDistance: 1.5
-  attackDashDuration: 0.15
+  slashEffectPrefab: {fileID: 5503505460791601945, guid: 74c549d1b06b6b140a1fd9536eea637f, type: 3}
   comboBufferDuration: 1
 --- !u!114 &5684814809896919960
 MonoBehaviour:

@@ -7,6 +7,10 @@ public class PlayerMovement : MonoBehaviour
     [Header("Configurações de Movimento")]
     public float runSpeed = 7f;
     public float rotationSpeed = 15f;
+
+    [Range(0f, 1f)] 
+    public float attackMovementMultiplier = 0.4f;
+
     public LayerMask wallLayer;
 
     [Header("Configurações do Dash (Para Frente)")]
@@ -78,14 +82,20 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isDashing) return;
 
+        // --- MUDANÇA AQUI: Lógica de Lentidão ao Atacar ---
+        
+        float currentSpeedLimit = runSpeed; // Pega a velocidade (que pode estar buffada)
+
         if (playerAttack.isAttacking)
         {
-            rb.linearVelocity = Vector3.zero;
-            animator.SetBool("isMoving", false);
-            return;
+            // Em vez de travar (return), reduzimos a velocidade
+            currentSpeedLimit *= attackMovementMultiplier;
         }
 
         bool isMoving = moveInput.magnitude > 0.1f;
+        
+        // Se quiser que a animação de "Walk" toque devagar enquanto ataca, mantenha isMoving true.
+        // Se quiser que ele deslize na pose de ataque, force false aqui ou no Animator.
         animator.SetBool("isMoving", isMoving);
 
         if (isMoving)
@@ -97,12 +107,14 @@ public class PlayerMovement : MonoBehaviour
 
             Vector3 moveDirection = (camForward * moveInput.y + camRight * moveInput.x).normalized;
 
-            Vector3 targetVelocity = moveDirection * runSpeed;
+            // Usa o limite calculado (Lento ou Normal)
+            Vector3 targetVelocity = moveDirection * currentSpeedLimit;
             targetVelocity.y = rb.linearVelocity.y;
             rb.linearVelocity = targetVelocity;
 
             if (moveDirection != Vector3.zero)
             {
+                // DICA: Se quiser travar a rotação enquanto ataca, coloque: if (!playerAttack.isAttacking)
                 Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
             }
