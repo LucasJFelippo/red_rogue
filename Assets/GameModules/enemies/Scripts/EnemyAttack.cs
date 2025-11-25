@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(EnemyStats))]
 public class EnemyAttack : MonoBehaviour
@@ -10,21 +11,24 @@ public class EnemyAttack : MonoBehaviour
 
     [Header("Common Settings")]
     public float attackRange = 5f;
-    [Tooltip("How long the attack animation takes.")]
     public float attackDuration = 1f;
-    public string animatorAttackTrigger = "Attack";
+    [Header("Animation Settings")]
+    [Tooltip("Nome exato do ESTADO da animação no Animator, não o Gatilho.")]
+    public string attackStateName = "Attack"; 
+    [Tooltip("Tempo para esperar antes de spawnar o projétil/hitbox.")]
+    public float attackImpactDelay = 0.3f;
 
     [Header("Ranged Attack Settings")]
     public GameObject projectilePrefab;
-    public Transform projectileSpawnPoint;
 
+    [Tooltip("Lista de spawn points. O inimigo alternará entre eles a cada ataque.")]
+    public Transform[] projectileSpawnPoints;
     private Animator animator;
     private EnemyStats stats;
 
     private int animatorAttackTriggerHash;
     private float timeSinceLastAttack = 0f;
-
-
+    private int currentSpawnPointIndex = 0;
     public bool CanAttack => timeSinceLastAttack >= stats.attackCooldown;
 
     void Awake()
@@ -35,8 +39,6 @@ public class EnemyAttack : MonoBehaviour
 
     void Start()
     {
-        animatorAttackTriggerHash = Animator.StringToHash(animatorAttackTrigger);
-
         if (stats != null)
         {
             timeSinceLastAttack = stats.attackCooldown;
@@ -54,38 +56,41 @@ public class EnemyAttack : MonoBehaviour
     public void PerformAttack(Transform target)
     {
         if (!CanAttack) return;
-
-        animator.SetTrigger(animatorAttackTriggerHash);
         timeSinceLastAttack = 0f;
+        animator.CrossFadeInFixedTime(attackStateName, 0.1f);
+        StartCoroutine(AttackRoutine(target));
+    }
+
+    private IEnumerator AttackRoutine(Transform target)
+    {
+        yield return new WaitForSeconds(attackImpactDelay);
 
         if (attackStyle == AttackStyle.Ranged)
         {
-            if (projectilePrefab == null || projectileSpawnPoint == null)
-            {
-                Debug.LogError("Ranged attack failed: Projectile Prefab or Spawn Point is not set.", this);
-                return;
-            }
-
-            GameObject projectile = Instantiate(projectilePrefab, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
-
-            Vector3 alvo = target.position;
-            alvo.y = transform.position.y;
-            projectile.transform.LookAt(alvo);
+            HandleRangedAttack(target);
         }
-        if (attackStyle == AttackStyle.Melee)
+        else
         {
-            if (projectilePrefab == null || projectileSpawnPoint == null)
-            {
-                Debug.LogError("Spit attack failed: Projectile Prefab or Spawn Point is not set.", this);
-                return;
-            }
-
-            GameObject projectile = Instantiate(projectilePrefab, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
-
-            Vector3 alvo = target.position;
-            alvo.y = transform.position.y;
-            projectile.transform.LookAt(alvo);
         }
+    }
 
+    private void HandleRangedAttack(Transform target)
+    {
+        if (projectilePrefab == null) return;
+        if (projectileSpawnPoints == null || projectileSpawnPoints.Length == 0) return;
+
+        Transform currentPoint = projectileSpawnPoints[currentSpawnPointIndex];
+
+        if (currentPoint != null)
+        {
+            GameObject projectile = Instantiate(projectilePrefab, currentPoint.position, currentPoint.rotation);
+            if (target != null)
+            {
+                Vector3 alvo = target.position;
+                alvo.y = transform.position.y;
+                projectile.transform.LookAt(alvo);
+            }
+        }
+        currentSpawnPointIndex = (currentSpawnPointIndex + 1) % projectileSpawnPoints.Length;
     }
 }

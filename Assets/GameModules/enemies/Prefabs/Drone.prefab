@@ -31,6 +31,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3501354168370505261}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2704653755834795065
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2363311373216107213}
+  m_Layer: 6
+  m_Name: Cannon (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2363311373216107213
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2704653755834795065}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.28, y: -0.46, z: 1.87}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3501354168370505261}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3501354168370149901
 GameObject:
   m_ObjectHideFlags: 0
@@ -55,7 +86,7 @@ GameObject:
   - component: {fileID: 8120802940927952956}
   m_Layer: 6
   m_Name: Drone
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -73,6 +104,7 @@ Transform:
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 1
   m_Children:
+  - {fileID: 2363311373216107213}
   - {fileID: 5724366011736126286}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -239,9 +271,12 @@ MonoBehaviour:
   attackStyle: 1
   attackRange: 14
   attackDuration: 0.6
-  animatorAttackTrigger: Attack
+  attackStateName: Attack
+  attackImpactDelay: 0.3
   projectilePrefab: {fileID: 2877784644291625097, guid: f73a39cb3ef6d414d8855edeeea2a4c4, type: 3}
-  projectileSpawnPoint: {fileID: 5724366011736126286}
+  projectileSpawnPoints:
+  - {fileID: 5724366011736126286}
+  - {fileID: 2363311373216107213}
 --- !u!114 &193051024681068607
 MonoBehaviour:
   m_ObjectHideFlags: 0

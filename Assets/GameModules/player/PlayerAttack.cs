@@ -8,27 +8,27 @@ public class PlayerAttack : MonoBehaviour
 {
     [Header("Configurações do Ataque")]
     public Transform attackPoint;
-    public int attackDamage = 20; // Dano base (será modificado pelo Buff)
-    
-    // Novo: Prefab do Slash (Projétil)
-    public GameObject slashEffectPrefab; 
+    public int attackDamage = 20;
+
+    public GameObject slashEffectPrefab;
+
+    [Header("Configurações de Reflexão (Parry)")]
+    public float parryRange = 2.0f;
+    public LayerMask projectileLayer;
 
     [Header("Sistema de Combo")]
     public float comboBufferDuration = 1.0f;
 
     public bool isAttacking { get; private set; }
 
-    // --- Componentes ---
     private Animator animator;
     private Rigidbody rb;
     private PlayerInputActions controls;
 
-    // --- Variáveis Internas ---
     private int comboCounter = 0;
     private bool comboInputReceived = false;
     private Coroutine comboWindowCoroutine;
-    
-    // Variáveis de Buff
+
     private int defaultDamage;
     private Coroutine damageBoostCoroutine;
 
@@ -44,7 +44,6 @@ public class PlayerAttack : MonoBehaviour
     void OnEnable() => controls.Enable();
     void OnDisable() => controls.Disable();
 
-    // Mantida a lógica de Buff de Dano
     public void ApplyDamageBoost(float multiplier, float duration)
     {
         if (damageBoostCoroutine != null)
@@ -89,16 +88,16 @@ public class PlayerAttack : MonoBehaviour
         animator.SetInteger("ComboStep", comboCounter);
         animator.SetTrigger("Attack");
 
-        // --- Instanciar o Projétil de Slash ---
+        CheckForParry();
+
         if (slashEffectPrefab != null && attackPoint != null)
         {
             GameObject slashObj = Instantiate(slashEffectPrefab, attackPoint.position, transform.rotation);
-            
-            // Passa o dano atual (que pode estar buffado) para o projétil
+
             SlashProjectile proj = slashObj.GetComponent<SlashProjectile>();
             if (proj != null)
             {
-                proj.damage = attackDamage; 
+                proj.damage = attackDamage;
             }
         }
         else
@@ -106,23 +105,31 @@ public class PlayerAttack : MonoBehaviour
             Debug.LogWarning("Faltando Slash Prefab ou Attack Point!");
         }
 
-        // REMOVIDO: O AttackDashCoroutine antigo. 
-        // O movimento agora é controlado pelo PlayerMovement (ficando lento)
-
-        // Janela de combo
         if (comboWindowCoroutine != null) StopCoroutine(comboWindowCoroutine);
         comboWindowCoroutine = StartCoroutine(ComboWindowCoroutine());
+    }
+    private void CheckForParry()
+    {
+        if (attackPoint == null) return;
+        Collider[] hitProjectiles = Physics.OverlapSphere(attackPoint.position, parryRange, projectileLayer);
+
+        foreach (Collider projCollider in hitProjectiles)
+        {
+            Projectile projectile = projCollider.GetComponent<Projectile>();
+            if (projectile != null && !projectile.isReflected)
+            {
+                projectile.Reflect(transform.forward);
+                Debug.Log("PARRY!");
+            }
+        }
     }
 
     private IEnumerator ComboWindowCoroutine()
     {
-        // Debug.Log("Janela de combo ABERTA.");
         yield return new WaitForSeconds(comboBufferDuration);
-        // Debug.Log("Janela de combo FECHADA.");
         comboWindowCoroutine = null;
     }
 
-    // --- FUNÇÃO DE EVENTO DE ANIMAÇÃO ---
     public void FinishAttackAnimation()
     {
         if (comboWindowCoroutine != null)
@@ -133,7 +140,7 @@ public class PlayerAttack : MonoBehaviour
 
         if (comboInputReceived)
         {
-            if (comboCounter == 4) // Ajuste conforme seu combo máximo
+            if (comboCounter == 4)
             {
                 ResetCombo();
                 return;
@@ -152,8 +159,7 @@ public class PlayerAttack : MonoBehaviour
         comboInputReceived = false;
         comboCounter = 0;
         animator.SetInteger("ComboStep", 0);
-        // Garante que a gravidade está ativa (caso alguma lógica antiga tenha mexido)
-        rb.useGravity = true; 
+        rb.useGravity = true;
     }
 
     public void CancelAttack()
@@ -170,7 +176,12 @@ public class PlayerAttack : MonoBehaviour
     {
         if (animator != null) animator.speed = speed;
     }
-    
-    // OBS: As funções StartAttackHitbox/FinishAttackHitbox foram removidas
-    // pois o hit agora é calculado pelo projétil.
+    void OnDrawGizmosSelected()
+    {
+        if (attackPoint != null)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(attackPoint.position, parryRange);
+        }
+    }
 }

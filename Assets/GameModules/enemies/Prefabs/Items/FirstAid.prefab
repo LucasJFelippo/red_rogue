@@ -113,7 +113,7 @@ MonoBehaviour:
   rotationSpeed: 85.67
   isFloating: 1
   useEasingForFloating: 1
-  floatHeight: 1.1
+  floatHeight: 1.05
   floatSpeed: 0.3
   startScale: {x: 1, y: 1, z: 1}
   endScale: {x: 1.05, y: 1.05, z: 1.05}
@@ -135,6 +135,11 @@ MonoBehaviour:
   type: 0
   value: 50
   duration: 0
+  lifeTime: 15
+  blinkDuration: 5
+  blinkSpeed: 10
+  floatAmplitude: 0.25
+  floatFrequency: 1
 --- !u!114 &-1707902175204135087
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,5 +177,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.757338, y: 2.6672862, z: 1.6380587}
-  m_Center: {x: 0.005107522, y: -0.045208186, z: 0.0063428283}
+  m_Size: {x: 3.8749588, y: 4.5225267, z: 2.3487127}
+  m_Center: {x: -0.0464049, y: -0.78410995, z: -0.011875629}
